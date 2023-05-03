@@ -8,13 +8,13 @@ results.
 # Libraries ------------------------------------------------------------------>
 
 import os
-import signal
-import subprocess
+from subprocess import Popen
 
 from termcolor import colored
 import tests
 from lab import Lab
 from process import Process
+from printer import Printer
 
 # Authorship ----------------------------------------------------------------->
 
@@ -51,9 +51,11 @@ class Tester:
     running external programs and capturing their output.
     """
     
-    def __init__(self, project_path: str, exe: str, test: str) -> None:
+    def __init__(self, project_path:str, exe:str, test:str, printer:Printer) \
+        -> None:
 
         self.project_path = project_path
+        self.printer = printer
         if test == "echo":
             self.name = "echo"
             self.cmd = ([f"{project_path}/{exe}"])
@@ -64,94 +66,53 @@ class Tester:
             self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.redirect
             self.tester = self.__redirects
+        # elif test == "heredoc":
+        #     self.name = "heredoc"
+        #     self.cmd = ([f"{project_path}/{exe}"])
+        #     self.tests = tests.heredoc
+        #     self.tester = self.__heredoc
 
 
     def run(self) -> None:
 
-        counter = 0
+        loop = 0
         for test in self.tests:
             lab = Lab(self.name)
             os.chdir(lab.path)
-            process = Process(self.cmd)
+            process = Process(self.cmd, self.printer)
             try:
                 if self.name == "echo":
-                    self.tester(process, test, counter)
+                    self.tester(process, test, loop)
                 elif self.name == "redirects":
-                    self.tester(process, test, counter, lab)
+                    self.tester(process, test, loop, lab)
+                # elif self.name == "heredoc":
+                #     self.tester(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
                 lab.remove()
-                counter += 1
+                loop += 1
 
     
-    def __echo(self, process: subprocess.Popen, test: str, counter: int) \
-        -> None:
-
-        def print_result(status, bash_output, minishell_output):
-            if status == "OK":
-                color = "green"
-                print(colored(
-                    f"TEST {counter + 1}: {status}\n",
-                    color
-                ))
-            else:
-                color = "red"
-                print(colored(
-                    f"TEST {counter + 1}: {status}\n"
-                    f"    Input:     {test}\n"
-                    f"    Bash:      {bash_output}\n"
-                    f"    Minishell: {minishell_output}\n",
-                    color
-                ))
+    def __echo(self, process:Popen, test: str, loop:int) -> None:
 
         bash_output = process.get_bash_output(test)
         minishell_output = process.get_minishell_output(
-            bash_output, test, counter)[0]
+            bash_output, test, loop, True)
+        if minishell_output == None:
+            return
+        
         bash_output = bash_output.strip('\n')
         minishell_output = minishell_output.strip('\n')
 
         if minishell_output == bash_output or minishell_output[:-1] == \
             bash_output:
-            print_result("OK", bash_output, minishell_output)
+            self.printer.result("OK", loop, test, bash_output, minishell_output)
         else:
-            print_result("KO", bash_output, minishell_output)
+            self.printer.result("KO", loop, test, bash_output, minishell_output)
     
 
-    def __redirects(self, process: subprocess.Popen, test: str, counter: int, \
-        lab: Lab) -> None:
-
-        def print_result(status, bash_output, minishell_output, \
-            bash_file_content, minishell_file_content):
-
-            if status == "OK":
-                color = "green"
-                print(colored(
-                    f"TEST {counter + 1}: {status}\n",
-                    color
-                ))
-            else:
-                color = "red" 
-                print(colored(
-                    f"TEST {counter + 1}: {status}\n"
-                    f"    Input:     {test}\n"
-                    f"    Bash:      {bash_output}\n"
-                    f"    Minishell: {minishell_output}\n\n"
-                    f"    Files content BASH:",
-                    color
-                ))
-                for key, value in bash_file_content.items():
-                    print(colored(
-                        f"      {key}: {value}",
-                        color
-                    ))
-                print(colored("\n    Files content MINISHELL:", color))
-                for key, value in minishell_file_content.items():
-                    print(colored(
-                        f"      {key}: {value}",
-                        color
-                    ))
-                print()
+    def __redirects(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
         
         test_files = lab.create_redirects_lab()
         bash_output = process.get_bash_output(test)
@@ -163,7 +124,7 @@ class Tester:
         
         test_files = lab.create_redirects_lab()
         minishell_output = process.get_minishell_output(
-            bash_output, test, counter)[0]
+            bash_output, test, loop, True)
         minishell_file_content = {}        
         for file in test_files:
             with open(file, 'r') as f:
@@ -175,8 +136,42 @@ class Tester:
 
         if (minishell_output == bash_output or minishell_output[:-1] == \
             bash_output) and minishell_file_content == bash_file_content:
-            print_result("OK", bash_output, minishell_output,\
+           self.printer.result("OK", loop, test, bash_output, minishell_output,
                 bash_file_content, minishell_file_content)
         else:
-            print_result("KO", bash_output, minishell_output,\
-                bash_file_content, minishell_file_content)
+            self.printer.result("KO", loop, test, bash_output, 
+                minishell_output, bash_file_content, minishell_file_content)
+
+
+    # def __heredoc(self, process: Popen, test: str, loop: int, lab: Lab) -> None:
+
+    #     test_files = lab.create_redirects_lab()
+    #     bash_output = process.get_bash_output(test)
+    #     bash_file_content = {}
+    #     for file in test_files:
+    #         with open(file, 'r') as f:
+    #             bash_file_content[file[-5:]] = f.read()
+    #     lab.remove_redirects_lab(test_files)
+
+    #     test_files = lab.create_redirects_lab()
+    #     minishell_file_content = {}
+    #     for file in test_files:
+    #         with open(file, 'r') as f:
+    #             minishell_file_content[file[-5:]] = f.read()
+    #     process.get_minishell_output(bash_output, test, loop, False)
+    #     minishell_file_content = {}        
+    #     for file in test_files:
+    #         with open(file, 'r') as f:
+    #             minishell_file_content[file[-5:]] = f.read()
+    #     lab.remove_redirects_lab(test_files)
+
+    #     if minishell_file_content == bash_file_content:
+    #         self.printer.result(
+    #             "OK", loop, test, bash_file_content=bash_file_content, 
+    #             minishell_file_content=minishell_file_content
+    #         )
+    #     else:
+    #         self.printer.result(
+    #             "KO", loop, test, bash_file_content=bash_file_content, 
+    #             minishell_file_content=minishell_file_content
+    #         )

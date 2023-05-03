@@ -23,7 +23,7 @@ __status__ = "Prototype"
 class Lab:
     """
     """
-    def __init__(self, test: str) -> None:
+    def __init__(self, test:str) -> None:
 
         self.test_name = test
         self.path = tempfile.mkdtemp()
