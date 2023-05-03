@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 
 """
-
+This module contains the `Process` class, which provides methods to 
+execute a command in a subprocess and interact with its input and output 
+streams.
 """
 
 # Libraries ------------------------------------------------------------------>
 
 import signal
 import shutil
+import pexpect
 import threading
 import subprocess
 
@@ -25,8 +28,30 @@ __status__ = "Prototype"
 
 class Process():
     """
+    Attributes
+    --------------------------------------------------------------------
+    process : subprocess.Popen
+        The Popen object representing the process.
+
+    printer : Printer
+        The Printer object used for logging.
+
+    Methods
+    --------------------------------------------------------------------
+    get_bash_output():
+        Runs a Bash command and returns its output as a string.
+
+    get_minishell_output():
+        It gets minishell output via a synchronization with bash output 
+        to avoid including the prompt or other garbage, but 
+        nevertheless, it is possible that not all cases are handled.
+        It has been prefirmed to use write and read with write() and 
+        readlines() methods, as they allow more flexibility, than 
+        directly communicate(), although this requires more complex 
+        handling with threads since readlines() is subject to blocking.
     """
     def __init__(self, args:str, printer:Printer) -> None:
+        self.args = args
         self.process = subprocess.Popen(
             args,
             stdin=subprocess.PIPE,
@@ -36,7 +61,6 @@ class Process():
             universal_newlines=True,   
         )
         self.printer = printer
-        # self.lock = threading.Lock()
 
 
     def get_bash_output(self, input:str) -> str:
@@ -52,8 +76,8 @@ class Process():
 
 
     def get_minishell_output(self, bash_output:str, input:str, loop:int, \
-        get_output:bool) -> tuple:
-
+        get_output:bool) -> str:
+       
         def read_thread(self, tmp:list):
             line = ""
             try:
@@ -104,3 +128,10 @@ class Process():
             return None
 
         return minishell_out
+
+
+    def quick_exe(self, input:str) -> None:
+       
+        process = pexpect.spawn(self.args)
+        process.send((input + '\n').encode())
+        process.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)

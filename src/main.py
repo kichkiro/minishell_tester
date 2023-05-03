@@ -60,9 +60,9 @@ def main():
 
     # HEREDOC TEST ----------------------------------------------------------->
 
-    # print()
-    # printer.section("Heredoc - TEST")
-    # heredoc.run()
+    print()
+    printer.section("Heredoc - TEST")
+    heredoc.run()
     
     # SUMMARY ---------------------------------------------------------------->
 

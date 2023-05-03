@@ -68,18 +68,19 @@ redirect = [
     "cat >> file1 > file2 < file3 < file4",
 ]
 
-# heredoc = [
-#     # "cat << \"E OF>\"file1",
-#     # "cat << \"E OF\"",
-#     # "cat << \"\"E\"O\"F\"\"",
-#     # "cat << ''EOF''",
-#     # "cat << '''E'O'F'''",
-#     # "cat << \"\"E\"O\"F\"\"",
-#     # "cat << \"EOF\"\"\"",
+heredoc = [
+    # "cat << \"E OF>\"file1",
+    # "cat << \"E OF\"",
+    # "cat << \"\"E\"O\"F\"\"",
+    # "cat << ''EOF''",
+    # "cat << '''E'O'F'''",
+    # "cat << \"\"E\"O\"F\"\"",
+    # "cat << \"EOF\"\"\"",
 
-#     "<< EOF\nEOF",    
-#     "< file1 < file2 < file3 << EOF\n42\nEOF",
-#     "cat < file1 > file2 << EOF\n42\nEOF",
-#     "cat < file1 > file2 << EOF > file3 << EOF\n42\nEOF\n43\nEOF",
-#     "cat << EOF > file1 << EOF\n42\nEOF\n43\nEOF"
-# ]
+    "<< EOF\nEOF",    
+    "< file1 < file2 < file3 << EOF\n42\nEOF",
+    "cat < file1 > file2 << EOF\n42\nEOF",
+    "cat < file1 > file2 << EOF > file3 << EOF\n42\nEOF\n43\nEOF",
+    "cat << EOF > file1 << EOF\n42\nEOF\n43\nEOF"
+    
+]

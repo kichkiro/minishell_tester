@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """
-
+Class that handles printing.
 """
 
 # Libraries ------------------------------------------------------------------>
@@ -20,6 +20,46 @@ __status__ = "Prototype"
 
 class Printer:
     """
+    Attributes
+    --------------------------------------------------------------------
+    test_n : int
+        Counter keeping track of the number of tests.
+        
+    passed_tests_n : int
+        Counter keeping track of the number of tests passed.
+
+    failed_tests_n : int
+        Counter tracking the number of failed tests.
+
+    failed_tests : str
+        String containing logs of failed tests.
+
+    Methods
+    --------------------------------------------------------------------
+    section():
+        Print a section header with a message and dashes to visually 
+        separate the sections.
+
+    result():
+        Print the results of a test in a formatted way, indicating 
+        whether the test passed or failed.
+
+    summary():
+        The summary function prints the total number of passed and 
+        failed tests. 
+        If all the tests pass, the function will exit. 
+        If there are failed tests, it prompts the user to decide whether 
+        to show the details of the failed tests or not.
+
+    __banner()
+        Print a formatted banner with ASCII art.
+
+    __failed_test()
+        Private method that handles the formatting and storage of failed 
+        test logs.
+        Thus, from each failed test, all information about the executed 
+        test is taken and added to the self.failed_tests attribute.
+
     """
     def __init__(self) -> None:
 
@@ -36,16 +76,11 @@ class Printer:
         print(colored(f"\n{msg} {dashes}>\n", "white", attrs=["bold"]))
         
 
-    def result(self, 
-        status:str, 
-        loop:int, 
-        test:str,
-        bash_output:str=None,
-        minishell_output:str=None,
-        bash_file_content:str=None,
-        minishell_file_content:str=None,
-        exception:str=None
-        ) -> None:
+    def result(
+        self, status:str, loop:int, test:str, bash_output:str=None,
+        minishell_output:str=None, bash_file_content:str=None,
+        minishell_file_content:str=None, exception:str=None
+    ) -> None:
         
         color = "green" if status == "OK" else "red"
         end = '\n' if (loop + 1) % 5 == 0 else ''
@@ -64,7 +99,7 @@ class Printer:
 
 
     def summary(self) -> None:
-
+       
         self.section("SUMMARY")
         print(colored(
             f"PASSED: {self.passed_tests_n} test\s\n"
@@ -85,12 +120,7 @@ class Printer:
 
 
     def __banner(self) -> None:
-        """
-		Print a formatted banner with ASCII art.
-		
-		Returns:
-			None
-		"""
+
         print(colored(
         "\n"
         "░░░╗   ░░░╗░░╗░░░╗   ░░╗░░╗░░░░░░░╗░░╗  ░░╗░░░░░░░╗░░╗     ░░╗     \n" 
@@ -110,14 +140,10 @@ class Printer:
 		))
     
     
-    def __failed_test(self, 
-        test:str,
-        bash_output:str,
-        minishell_output:str,
-        bash_file_content:str,
-        minishell_file_content:str,
-        exception:str
-        ) -> None:
+    def __failed_test(
+        self, test:str, bash_output:str, minishell_output:str,
+        bash_file_content:str, minishell_file_content:str, exception:str
+    ) -> None:
     
         test = test.replace('\n', '\\n')
         self.failed_tests += \

@@ -24,12 +24,12 @@ def makefile(rules:str, must_print:bool, project_path:str):
     """
     Run the make command with specified rules on a given project path.
     
-    Args:
+    Params:
         rules (str): The makefile rules to run.
         must_print (bool): Whether to print output or not.
         project_path (str): The path to the project directory.
 
-        Returns:
+    Returns:
         None
     """
     if rules != "":

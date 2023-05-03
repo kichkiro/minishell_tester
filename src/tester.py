@@ -32,6 +32,7 @@ class Tester:
     --------------------------------------------------------------------
     project_path : str
         The path to the project to be tested.
+
     test : str
         The name of the test to run.
 
@@ -40,8 +41,6 @@ class Tester:
     run():
         Runs the test cases and prints the results.
 
-    Private Methods
-    ---------------
     __echo(...) <- DOCUMENT FROM HERE ******************
 
     Notes
@@ -66,11 +65,11 @@ class Tester:
             self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.redirect
             self.tester = self.__redirects
-        # elif test == "heredoc":
-        #     self.name = "heredoc"
-        #     self.cmd = ([f"{project_path}/{exe}"])
-        #     self.tests = tests.heredoc
-        #     self.tester = self.__heredoc
+        elif test == "heredoc":
+            self.name = "heredoc"
+            self.cmd = ([f"{project_path}/{exe}"])
+            self.tests = tests.heredoc
+            self.tester = self.__heredoc
 
 
     def run(self) -> None:
@@ -85,8 +84,8 @@ class Tester:
                     self.tester(process, test, loop)
                 elif self.name == "redirects":
                     self.tester(process, test, loop, lab)
-                # elif self.name == "heredoc":
-                #     self.tester(process, test, loop, lab)
+                elif self.name == "heredoc":
+                    self.tester(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
@@ -143,35 +142,35 @@ class Tester:
                 minishell_output, bash_file_content, minishell_file_content)
 
 
-    # def __heredoc(self, process: Popen, test: str, loop: int, lab: Lab) -> None:
+    def __heredoc(self, process: Popen, test: str, loop: int, lab: Lab) -> None:
 
-    #     test_files = lab.create_redirects_lab()
-    #     bash_output = process.get_bash_output(test)
-    #     bash_file_content = {}
-    #     for file in test_files:
-    #         with open(file, 'r') as f:
-    #             bash_file_content[file[-5:]] = f.read()
-    #     lab.remove_redirects_lab(test_files)
+        test_files = lab.create_redirects_lab()
+        process.get_bash_output(test)
+        bash_file_content = {}
+        for file in test_files:
+            with open(file, 'r') as f:
+                bash_file_content[file[-5:]] = f.read()
+        lab.remove_redirects_lab(test_files)
 
-    #     test_files = lab.create_redirects_lab()
-    #     minishell_file_content = {}
-    #     for file in test_files:
-    #         with open(file, 'r') as f:
-    #             minishell_file_content[file[-5:]] = f.read()
-    #     process.get_minishell_output(bash_output, test, loop, False)
-    #     minishell_file_content = {}        
-    #     for file in test_files:
-    #         with open(file, 'r') as f:
-    #             minishell_file_content[file[-5:]] = f.read()
-    #     lab.remove_redirects_lab(test_files)
+        test_files = lab.create_redirects_lab()
+        minishell_file_content = {}
+        for file in test_files:
+            with open(file, 'r') as f:
+                minishell_file_content[file[-5:]] = f.read()
+        process.quick_exe(test)
+        minishell_file_content = {}        
+        for file in test_files:
+            with open(file, 'r') as f:
+                minishell_file_content[file[-5:]] = f.read()
+        lab.remove_redirects_lab(test_files)
 
-    #     if minishell_file_content == bash_file_content:
-    #         self.printer.result(
-    #             "OK", loop, test, bash_file_content=bash_file_content, 
-    #             minishell_file_content=minishell_file_content
-    #         )
-    #     else:
-    #         self.printer.result(
-    #             "KO", loop, test, bash_file_content=bash_file_content, 
-    #             minishell_file_content=minishell_file_content
-    #         )
+        if minishell_file_content == bash_file_content:
+            self.printer.result(
+                "OK", loop, test, bash_file_content=bash_file_content, 
+                minishell_file_content=minishell_file_content
+            )
+        else:
+            self.printer.result(
+                "KO", loop, test, bash_file_content=bash_file_content, 
+                minishell_file_content=minishell_file_content
+            )
