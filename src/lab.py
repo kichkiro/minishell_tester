@@ -73,3 +73,18 @@ class Lab:
         for file in test_files:
             if os.path.exists(file):
                 os.remove(file)
+
+
+    def create_exit_status_lab(self) -> str:
+
+        path = os.path.join(self.path, "not_executable_file")
+        with open(path, 'w') as file:
+            file.write("42")
+
+        return path
+    
+
+    def remove_exit_status_lab(self, path:str) -> None:
+
+        if os.path.exists(path):
+            os.remove(path)

@@ -39,31 +39,37 @@ def main():
     exe = "minishell"
 
     printer = Printer()
-    echo = Tester(project_path, exe, "echo", printer)
+    parsing = Tester(project_path, exe, "parsing", printer)
+    commands = Tester(project_path, exe, "commands", printer)
     redirect = Tester(project_path, exe, "redirects", printer)
-    heredoc = Tester(project_path, exe, "heredoc", printer)
+    exit_status = Tester(project_path, exe, "exit_status", printer)
 
     # PRE-TEST --------------------------------------------------------------->
 
     printer.section("PRE-TEST")
     utils.makefile("", True, project_path)
+    utils.norminette(project_path)
 
     # ECHO TEST -------------------------------------------------------------->
 
-    printer.section("Echo - TEST")
-    echo.run()
+    printer.section("Parsing")
+    parsing.run()
+
+    # COMMANDS TEST ---------------------------------------------------------->
+
+    printer.section("Commands")
+    commands.run()
 
     # REDIRECTS TEST --------------------------------------------------------->
 
-    printer.section("Redirects - TEST")
+    printer.section("Redirects")
     redirect.run()
 
-    # HEREDOC TEST ----------------------------------------------------------->
+    # Exit Status ------------------------------------------------------------>
 
-    print()
-    printer.section("Heredoc - TEST")
-    heredoc.run()
-    
+    printer.section("Exit Status")
+    exit_status.run()
+
     # SUMMARY ---------------------------------------------------------------->
 
     printer.summary()

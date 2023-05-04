@@ -13,10 +13,11 @@ python3 src/main.py [project path]
 
 ## 📝 - Todo
 
-- [v] - Parsing (tested whit echo)
-- [v] - Redirects
-- [ ] - Heredoc
-- [ ] - Pipe
-- [ ] - Builtins
-- [ ] - Wildcards
-- [ ] - Boolean operators
+[v] - Parsing (tested whit echo)
+[v] - Commands
+[v] - Redirects
+[v] - Exit status
+[ ] - Builtins
+[ ] - Pipe
+[ ] - Wildcards
+[ ] - Boolean operators

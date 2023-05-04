@@ -10,7 +10,6 @@ streams.
 
 import signal
 import shutil
-import pexpect
 import threading
 import subprocess
 
@@ -45,10 +44,14 @@ class Process():
         It gets minishell output via a synchronization with bash output 
         to avoid including the prompt or other garbage, but 
         nevertheless, it is possible that not all cases are handled.
+
         It has been prefirmed to use write and read with write() and 
         readlines() methods, as they allow more flexibility, than 
         directly communicate(), although this requires more complex 
         handling with threads since readlines() is subject to blocking.
+
+        If the get_exit_status argument is True, it performs a recursion 
+        to get the output of "echo $?" on the same minishell instance.
     """
     def __init__(self, args:str, printer:Printer) -> None:
         self.args = args
@@ -61,22 +64,30 @@ class Process():
             universal_newlines=True,   
         )
         self.printer = printer
+        self.exit_status_bash = 0
+        self.exit_status_minishell = 0
 
 
     def get_bash_output(self, input:str) -> str:
         
-        bash_output = subprocess.check_output(
-            input,
-            shell=True,
-            executable=shutil.which("bash"),
-            text=True,
-            universal_newlines=True
-        )
+        bash_output = ""
+        try:
+            bash_output = subprocess.check_output(
+                input,
+                shell=True,
+                executable=shutil.which("bash"),
+                text=True,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT
+            )
+        except subprocess.CalledProcessError as e:
+            self.exit_status_bash = e.returncode
+
         return bash_output
 
 
     def get_minishell_output(self, bash_output:str, input:str, loop:int, \
-        get_output:bool) -> str:
+        get_exit_status:bool) -> str:
        
         def read_thread(self, tmp:list):
             line = ""
@@ -97,21 +108,35 @@ class Process():
             self.process.stdin.write(input + '\n')
             self.process.stdin.flush()
 
-            if get_output:
-                while input not in minishell_out:
-                    minishell_out += self.process.stdout.readline()
-                minishell_out = ""
-                while minishell_out.count('\n') <= bash_output.count('\n'):
-                    if counter == bash_output.count('\n'):
-                        break
-                    tmp = []
-                    t = threading.Thread(target=read_thread, args=(self, tmp,))
-                    t.start()
-                    t.join(timeout=1)
-                    if t.is_alive():
-                        raise subprocess.TimeoutExpired(self.process, 1)
-                    minishell_out += tmp[0]
-                    counter += 1
+            while input not in minishell_out:
+                tmp = []
+                t = threading.Thread(target=read_thread, args=(self, tmp,))
+                t.start()
+                t.join(timeout=1)
+                if t.is_alive():
+                    raise subprocess.TimeoutExpired(self.process, 1)
+                minishell_out += tmp[0]
+                counter += 1
+                
+            minishell_out = ""
+            counter = 0
+            while minishell_out.count('\n') <= bash_output.count('\n'):
+                if counter == bash_output.count('\n'):
+                    break
+                tmp = []
+                t = threading.Thread(target=read_thread, args=(self, tmp,))
+                t.start()
+                t.join(timeout=1)
+                if t.is_alive():
+                    raise subprocess.TimeoutExpired(self.process, 1)
+                minishell_out += tmp[0]
+                counter += 1
+
+            if get_exit_status:
+                self.exit_status_minishell = int(self.get_minishell_output(
+                    '\n', 'echo $?', loop, get_exit_status=False))
+                if self.exit_status_minishell == None:
+                    return None
 
             self.process.communicate(timeout=1)
             if self.process.returncode == -11:
@@ -124,14 +149,8 @@ class Process():
             self.printer.result("KO", loop, input, exception="Timeout")
             return None
         except Exception as e:
-            self.printer.result("KO", loop, input, exception=e)
+            if input != "echo $?":
+                self.printer.result("KO", loop, input, exception=e)
             return None
 
         return minishell_out
-
-
-    def quick_exe(self, input:str) -> None:
-       
-        process = pexpect.spawn(self.args)
-        process.send((input + '\n').encode())
-        process.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)

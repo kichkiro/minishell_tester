@@ -41,7 +41,7 @@ class Tester:
     run():
         Runs the test cases and prints the results.
 
-    __echo(...) <- DOCUMENT FROM HERE ******************
+    ...
 
     Notes
     --------------------------------------------------------------------
@@ -55,21 +55,26 @@ class Tester:
 
         self.project_path = project_path
         self.printer = printer
-        if test == "echo":
-            self.name = "echo"
+        if test == "parsing":
+            self.name = "parsing"
             self.cmd = ([f"{project_path}/{exe}"])
-            self.tests = tests.echo
-            self.tester = self.__echo
+            self.tests = tests.parsing
+            self.tester = self.__commands
+        elif test == "commands":
+            self.name = "commands"
+            self.cmd = ([f"{project_path}/{exe}"])
+            self.tests = tests.commands
+            self.tester = self.__commands
         elif test == "redirects":
             self.name = "redirects"
             self.cmd = ([f"{project_path}/{exe}"])
-            self.tests = tests.redirect
+            self.tests = tests.redirects
             self.tester = self.__redirects
-        elif test == "heredoc":
-            self.name = "heredoc"
+        elif test == "exit_status":
+            self.name = "exit_status"
             self.cmd = ([f"{project_path}/{exe}"])
-            self.tests = tests.heredoc
-            self.tester = self.__heredoc
+            self.tests = tests.exit_status
+            self.tester = self.__exit_status
 
 
     def run(self) -> None:
@@ -80,41 +85,42 @@ class Tester:
             os.chdir(lab.path)
             process = Process(self.cmd, self.printer)
             try:
-                if self.name == "echo":
+                if self.name == "parsing":
+                    self.tester(process, test, loop)
+                elif self.name == "commands":
                     self.tester(process, test, loop)
                 elif self.name == "redirects":
                     self.tester(process, test, loop, lab)
-                elif self.name == "heredoc":
+                elif self.name == "exit_status":
                     self.tester(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
                 lab.remove()
                 loop += 1
-
     
-    def __echo(self, process:Popen, test: str, loop:int) -> None:
 
-        bash_output = process.get_bash_output(test)
-        minishell_output = process.get_minishell_output(
-            bash_output, test, loop, True)
-        if minishell_output == None:
+    def __commands(self, process: Popen, test: str, loop: int) -> None:
+
+        bash_out = process.get_bash_output(test)
+        minishell_out = process.get_minishell_output(
+            bash_out, test, loop, False)
+        if minishell_out == None:
             return
-        
-        bash_output = bash_output.strip('\n')
-        minishell_output = minishell_output.strip('\n')
+        bash_out = bash_out.strip('\n')
+        minishell_out = minishell_out.strip('\n')
 
-        if minishell_output == bash_output or minishell_output[:-1] == \
-            bash_output:
-            self.printer.result("OK", loop, test, bash_output, minishell_output)
+        if minishell_out == bash_out or minishell_out[:-1] == \
+            bash_out:
+            self.printer.result("OK", loop, test, bash_out, minishell_out)
         else:
-            self.printer.result("KO", loop, test, bash_output, minishell_output)
-    
+            self.printer.result("KO", loop, test, bash_out, minishell_out)
+
 
     def __redirects(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
         
         test_files = lab.create_redirects_lab()
-        bash_output = process.get_bash_output(test)
+        bash_out = process.get_bash_output(test)
         bash_file_content = {}
         for file in test_files:
             with open(file, 'r') as f:
@@ -122,55 +128,42 @@ class Tester:
         lab.remove_redirects_lab(test_files)
         
         test_files = lab.create_redirects_lab()
-        minishell_output = process.get_minishell_output(
-            bash_output, test, loop, True)
+        minishell_out = process.get_minishell_output(
+            bash_out, test, loop, False)
+        if minishell_out == None:
+            return
         minishell_file_content = {}        
         for file in test_files:
             with open(file, 'r') as f:
                 minishell_file_content[file[-5:]] = f.read()
         lab.remove_redirects_lab(test_files)
 
-        bash_output = bash_output.strip('\n')
-        minishell_output = minishell_output.strip('\n')
+        bash_out = bash_out.strip('\n')
+        minishell_out = minishell_out.strip('\n')
 
-        if (minishell_output == bash_output or minishell_output[:-1] == \
-            bash_output) and minishell_file_content == bash_file_content:
-           self.printer.result("OK", loop, test, bash_output, minishell_output,
+        if (minishell_out == bash_out or minishell_out[:-1] == \
+            bash_out) and minishell_file_content == bash_file_content:
+           self.printer.result("OK", loop, test, bash_out, minishell_out,
                 bash_file_content, minishell_file_content)
         else:
-            self.printer.result("KO", loop, test, bash_output, 
-                minishell_output, bash_file_content, minishell_file_content)
+            self.printer.result("KO", loop, test, bash_out, 
+                minishell_out, bash_file_content, minishell_file_content)
 
 
-    def __heredoc(self, process: Popen, test: str, loop: int, lab: Lab) -> None:
+    def __exit_status(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
 
-        test_files = lab.create_redirects_lab()
-        process.get_bash_output(test)
-        bash_file_content = {}
-        for file in test_files:
-            with open(file, 'r') as f:
-                bash_file_content[file[-5:]] = f.read()
-        lab.remove_redirects_lab(test_files)
+        file = lab.create_exit_status_lab()
+        bash_out = process.get_bash_output(test)
+        minishell_out = process.get_minishell_output(bash_out, test, loop, True)
+        lab.remove_exit_status_lab(file)
+        if minishell_out == None:
+            return
 
-        test_files = lab.create_redirects_lab()
-        minishell_file_content = {}
-        for file in test_files:
-            with open(file, 'r') as f:
-                minishell_file_content[file[-5:]] = f.read()
-        process.quick_exe(test)
-        minishell_file_content = {}        
-        for file in test_files:
-            with open(file, 'r') as f:
-                minishell_file_content[file[-5:]] = f.read()
-        lab.remove_redirects_lab(test_files)
-
-        if minishell_file_content == bash_file_content:
-            self.printer.result(
-                "OK", loop, test, bash_file_content=bash_file_content, 
-                minishell_file_content=minishell_file_content
-            )
+        if process.exit_status_bash == process.exit_status_minishell:
+            self.printer.result("OK", loop, test, 
+                bash_exit_status=process.exit_status_bash,
+                minishell_exit_status=process.exit_status_minishell)
         else:
-            self.printer.result(
-                "KO", loop, test, bash_file_content=bash_file_content, 
-                minishell_file_content=minishell_file_content
-            )
+            self.printer.result("KO", loop, test,
+                bash_exit_status=process.exit_status_bash,
+                minishell_exit_status=process.exit_status_minishell)

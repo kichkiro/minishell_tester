@@ -50,3 +50,24 @@ def makefile(rules:str, must_print:bool, project_path:str):
     elif process.returncode:
         print(colored(f"Make: KO!\n\n    {stderr.decode('utf-8')}", "red"))
         exit(1)
+
+
+def norminette(project_path: str):
+    """
+    Run the norminette command on a given project path.
+
+    Args:
+        project_path (str): The path to the project directory.
+    Returns:
+        None
+    """
+    process = subprocess.Popen(
+        ["norminette", project_path],
+        stdout=subprocess.PIPE, 
+        stderr=subprocess.PIPE
+    )
+    process.communicate()
+    if not process.returncode:
+        print(colored("Norminette: OK", "green"))
+    else:
+        print(colored("Norminette: Error!", "red"))

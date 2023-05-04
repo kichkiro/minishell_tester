@@ -4,6 +4,10 @@
 Arguments for testing.
 """
 
+# Libraries ------------------------------------------------------------------>
+
+from shutil import which
+
 # Authorship ----------------------------------------------------------------->
 
 __author__ = "Kirill Chkirov"
@@ -14,7 +18,7 @@ __status__ = "Prototype"
 
 # TESTS ---------------------------------------------------------------------->
 
-echo = [
+parsing = [
     "echo ",
     "echo hello world !",
     "echo 42test ' 21 '",
@@ -47,11 +51,45 @@ echo = [
     "echo ''\"\"'\"'\"'\"",
 ]
 
-redirect = [
-    "echo 42 < file1",
+commands = [
+    f"{which('ls')}",
+    f"{which('ls')} -al",
+    f"{which('ls')} -al -i",
+    f"{which('ls')} -al -i -t",
+    f"{which('ls')} -al -i -t -v",
+    f"{which('cat')} /etc/passwd",
+    f"{which('cat')} /etc/passwd -n",
+    f"{which('cat')} /etc/passwd -n -e",
+    f"{which('cat')} /etc/passwd -n -e -t",
+    f"{which('cat')} /etc/passwd -n -e -t -v",
+    f"{which('wc')} -l /etc/passwd",
+    f"{which('wc')} -l /etc/passwd -m",
+    f"{which('wc')} -l /etc/passwd -m -w",
+    f"{which('wc')} -l /etc/passwd -m -w -c",
+    f"{which('wc')} -l /etc/passwd -m -w -c -l",
+    "ls",
+    "ls -al",
+    "ls -al -i",
+    "ls -al -i -t",
+    "ls -al -i -t -v",
+    "cat /etc/passwd",
+    "cat /etc/passwd -n",
+    "cat /etc/passwd -n -e",
+    "cat /etc/passwd -n -e -t",
+    "cat /etc/passwd -n -e -t -v",
+    "wc -l /etc/passwd",
+    "wc -l /etc/passwd -m",
+    "wc -l /etc/passwd -m -w",
+    "wc -l /etc/passwd -m -w -c",
+    "wc -l /etc/passwd -m -w -c -l",
+]
+
+redirects = [
     "< file1",
     "> file1",
     ">> file1",
+    "< file1 > file2",
+    "< file1 >> file2",
     "cat < file1",
     "cat < file1 > file2 > file3",
     "cat < file1 >> file2 >> file3",
@@ -66,21 +104,39 @@ redirect = [
     "cat > file1 < file2",
     "cat >> file1 < file2 < file3",
     "cat >> file1 > file2 < file3 < file4",
+    "cat >> file1 >> file2 < file3 < file4",
+    "cat >> file1 >> file2 >> file3 < file4",
+    "cat /etc/passwd < /etc/passwd",
+    "cat /etc/passwd < /etc/passwd > file1",
+    "cat /etc/passwd < /etc/passwd > file1 > file2",
+    "cat /etc/passwd < /etc/passwd > file1 > file2 > file3",
+    "cat file1 < /etc/passwd > file1 > file2 > file3",
+    "cat file1 < /etc/passwd > file1 > file2 > file3 > file4",
+    "cat file1 < /etc/passwd >> file1 >> file2",
+    "cat file1 < /etc/passwd >> file1 >> file2 >> file3",
+    "cat file1 < /etc/passwd >> file1 >> file2 >> file3 >> file4",
 ]
 
-heredoc = [
-    # "cat << \"E OF>\"file1",
-    # "cat << \"E OF\"",
-    # "cat << \"\"E\"O\"F\"\"",
-    # "cat << ''EOF''",
-    # "cat << '''E'O'F'''",
-    # "cat << \"\"E\"O\"F\"\"",
-    # "cat << \"EOF\"\"\"",
+exit_status = [
+    "echo 42",
+    "cat 42 > not_executable_file",
+    "cat 42 > not_existing_file",
+    "./not_executable_file",
+    "not_existing_command",
+    "< not_existing_file",
+    "> not_existing_file",
+    ">> not_existing_file",
+    "< not_existing_file > not_existing_file2",
+    "< not_existing_file >> not_existing_file2",
+]
 
-    "<< EOF\nEOF",    
-    "< file1 < file2 < file3 << EOF\n42\nEOF",
-    "cat < file1 > file2 << EOF\n42\nEOF",
-    "cat < file1 > file2 << EOF > file3 << EOF\n42\nEOF\n43\nEOF",
-    "cat << EOF > file1 << EOF\n42\nEOF\n43\nEOF"
-    
+mixed = [
+    "ls -al -i < /etc/passwd",
+    "ls -al -i < /etc/passwd > file1",
+    "ls -al -i < /etc/passwd > file1 > file2",
+    "ls -al -i < /etc/passwd > file1 > file2 > file3",
+    "ls -al -i < /etc/passwd > file1 > file2 > file3 > file4",
+    "wc -l < /etc/passwd > file1 > file2 > file3 > file4",
+    "wc -l < /etc/passwd",
+    "wc -l < /etc/passwd",
 ]

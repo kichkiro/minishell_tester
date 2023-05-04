@@ -72,29 +72,35 @@ class Printer:
 
     def section(self, msg:str) -> None:
 
-        dashes = '-' * (68 - len(msg))
+        dashes = '-' * (73 - len(msg))
         print(colored(f"\n{msg} {dashes}>\n", "white", attrs=["bold"]))
         
 
     def result(
         self, status:str, loop:int, test:str, bash_output:str=None,
         minishell_output:str=None, bash_file_content:str=None,
-        minishell_file_content:str=None, exception:str=None
+        minishell_file_content:str=None, exception:str=None, 
+        bash_exit_status:int=None, minishell_exit_status:int=None
     ) -> None:
         
         color = "green" if status == "OK" else "red"
         end = '\n' if (loop + 1) % 5 == 0 else ''
-        extra_space = ' ' if (self.test_n) < 10 else ''
+        extra_space = ''
+        if self.test_n < 10:
+            extra_space = '  '
+        elif self.test_n < 100:
+            extra_space = ' '
         print(colored(
             f"TEST {extra_space}{self.test_n}: {status} | ",
             color=color
-        ), end=end)
+        ), end=end, flush=True)
         if status == "OK":
             self.passed_tests_n += 1
         elif status == "KO":
             self.failed_tests_n += 1
             self.__failed_test(test, bash_output, minishell_output, 
-                bash_file_content, minishell_file_content, exception)
+                bash_file_content, minishell_file_content, exception,
+                bash_exit_status, minishell_exit_status)
         self.test_n += 1
 
 
@@ -142,21 +148,29 @@ class Printer:
     
     def __failed_test(
         self, test:str, bash_output:str, minishell_output:str,
-        bash_file_content:str, minishell_file_content:str, exception:str
+        bash_file_content:str, minishell_file_content:str, exception:str,
+        bash_exit_status:int=None, minishell_exit_status:int=None
     ) -> None:
     
         test = test.replace('\n', '\\n')
         self.failed_tests += \
             f"\nTEST {self.test_n}: KO"\
-            f"\n    Input:     [{test}]"
+            f"\n    Input:        [{test}]"
         if exception:
+            error = str(exception)
+            if len(error) > 52:
+                error = error[:52] + '\n' + (' ' * 17) + error[52:]
             self.failed_tests += \
-                f"\n    Exception: {exception}"
+                f"\n    Exception:    {error}"
         else:
             if bash_output != None and minishell_output != None:
                 self.failed_tests += \
-                    f"\n    Bash:      [{bash_output}]"\
-                    f"\n    Minishell: [{minishell_output}]"
+                    f"\n    Bash:         [{bash_output}]"\
+                    f"\n    Minishell:    [{minishell_output}]"
+            if bash_exit_status != None and minishell_exit_status != None:
+                self.failed_tests += \
+                    f"\n    Bash $?:      [{bash_exit_status}]"\
+                    f"\n    Minishell $?: [{minishell_exit_status}]"
             if bash_file_content and minishell_file_content:
                 self.failed_tests += \
                     f"\n\n    Lab creation:"\
