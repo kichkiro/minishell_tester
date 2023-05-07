@@ -34,7 +34,7 @@ class Lab:
     Methods
     --------------------------------------------------------------------
     remove():
-        Removes the temporary directory.
+        Remove the test lab.
 
     create_redirects_lab():
         Creates 4 temporary files in the Lab's directory and returns 
@@ -42,6 +42,20 @@ class Lab:
 
     remove_redirects_lab():
         Removes the specified files from the Lab's directory.
+
+    create_exit_status_lab():
+        Creates a file in the Lab's directory and returns its path.
+
+    remove_exit_status_lab():
+        Removes the specified file.
+
+    create_wildcard_lab():
+        Creates two files and two directories at the root of the Lab's
+        and two files for each directory, and returns their paths as a
+        tuple.
+
+    remove_wildcard_lab():
+        Removes the specified files and drirectories.
 
     """
     def __init__(self, test:str) -> None:
@@ -68,9 +82,9 @@ class Lab:
         return tuple(paths)
 
 
-    def remove_redirects_lab(self, test_files:list) -> None:
+    def remove_redirects_lab(self, files:list) -> None:
 
-        for file in test_files:
+        for file in files:
             if os.path.exists(file):
                 os.remove(file)
 
@@ -88,3 +102,32 @@ class Lab:
 
         if os.path.exists(path):
             os.remove(path)
+
+
+    def create_wildcards_lab(self) -> tuple:
+        filenames = ["file1", "file2"]
+        dirnames = ["directory1", "directory2"]
+
+        for i, filename in enumerate(filenames):
+            filepath = os.path.join(".", filename)
+            with open(filepath, "w") as f:
+                f.write(str(i+1))
+
+        for dirname in dirnames:
+            os.makedirs(dirname)
+            for i, filename in enumerate(filenames):
+                filepath = os.path.join(dirname, filename)
+                with open(filepath, "w") as f:
+                    f.write(str(i+1))
+
+        return (filenames, dirnames)
+
+
+    def remove_wildcards_lab(self, filenames:list, dirnames:list) -> None:
+
+        for dirname in dirnames:
+            shutil.rmtree(dirname)
+
+        for filename in filenames:
+            if os.path.exists(filename):
+                os.remove(filename)

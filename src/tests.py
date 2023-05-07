@@ -128,6 +128,8 @@ exit_status = [
     ">> not_existing_file",
     "< not_existing_file > not_existing_file2",
     "< not_existing_file >> not_existing_file2",
+    # "| echo 1"
+    # "| echo 1 | echo 2",
 ]
 
 mixed = [
@@ -139,4 +141,70 @@ mixed = [
     "wc -l < /etc/passwd > file1 > file2 > file3 > file4",
     "wc -l < /etc/passwd",
     "wc -l < /etc/passwd",
+]
+
+booleans = [
+    "echo 42 && echo 21",
+    "echo 42 || echo 21",
+    "42 && echo 21",
+    "42 || echo 21",
+    "echo 1 && echo 2 && echo 3 && echo 4 && echo 5",
+    "echo 1 && (echo 2 && echo 3)",
+    "echo 1 && (echo 2 || echo 3) && echo 4",
+    "1 || 2 || 3 || 4 || echo 5",
+    "echo 1 || (echo 2 && echo 3) || echo 4",
+    "echo 1 && (echo 2 || echo 3) && echo 4 && (echo 5 || echo 6)",
+    "(echo 1 && echo 2) || (echo 3 && echo 4) && (echo 5 || echo 6)",
+    "((((echo 1 || (echo 2 || 3) && echo 4) || echo 5) && echo 6) || echo 7)",
+    "1 || (echo 2 && ((echo 3 || echo 4) && echo 5))",
+    "1 || (echo 2 && ((3 || echo 4) || echo 5))",
+    "((echo 1 && echo 2) || (echo 3 && echo 4))",
+    "(echo 1 && echo 2) || (echo 3 && echo 4)",
+    "(echo 1 && echo 2) || echo 3",
+    "echo 1 || (echo 2 && echo 3) && echo 4",
+    "(echo 1 || echo 2) && (echo 3 || echo 4)",
+    "echo 1 && (echo 2 || echo 3) || echo 4",
+    "(echo 1 && echo 2) && (echo 3 || echo 4)",
+    "(echo 1 || echo 2) && (echo 3 || echo 4) && (echo 5 || echo 6)",
+    "(echo 1 && echo 2) || (echo 3 || echo 4) || (echo 5 && echo 6)",
+    "(echo 1 || echo 2) && (echo 3 || echo 4) || (echo 5 && echo 6)",
+    "(echo 1 || echo 2) && echo 3 || echo 4",
+    "echo 1 && (echo 2 || echo 3) && () && echo 4",
+    "((echo 1 && echo 2) || (echo 3 || echo 4)) && (echo 5 && echo 6)",
+    "(echo 1 && echo 2) || ((echo 3 || echo 4) && (echo 5 || echo 6)) || \
+        (echo 7 && echo 8)",
+    "echo 1 && (echo 2 || echo 3) && (echo 4 || (echo 5 && (echo 6 || echo 7 \
+        && (echo 8 || (echo 9 && echo 10)))))",
+    "echo 1 || (echo 2 || echo 3 || echo 4 || echo 5 || echo 6 || echo 7 || \
+        echo 8 || echo 9 || echo 10 || echo 11 || echo 12 || echo 13 || echo \
+        14 || echo 15 || echo 16 || echo 17 || echo 18 || echo 19 || echo 20)",
+]
+
+wildcards = [
+    "echo *",
+    "ls *",
+    "ls -al *",
+    "echo $USER*",
+    "echo i*l*de",
+    "echo ***y",
+    "echo d*************************y",
+    "echo **************1",
+    "ls -al d*cto*r*1",
+    "ls -al d*cto*r*1*",
+    "echo ****1 ***2",
+    "ls -al file*",
+    "ls -al directory*",
+    "ls -al *1",
+    "ls -al *2",
+    "echo d*y",
+    "echo *i*e*",
+    "echo *1 *2",
+    "echo d*2",
+    "echo **1**",
+    "echo d*fi*",
+    "echo *42 *21",
+
+
+    
+
 ]

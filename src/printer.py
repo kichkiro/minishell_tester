@@ -46,19 +46,19 @@ class Printer:
 
     summary():
         The summary function prints the total number of passed and 
-        failed tests. 
-        If all the tests pass, the function will exit. 
-        If there are failed tests, it prompts the user to decide whether 
-        to show the details of the failed tests or not.
+        failed tests.
+        It also asks the user whether he/she wants to see passed and/or 
+        failed tests or exit.
 
     __banner()
         Print a formatted banner with ASCII art.
 
-    __failed_test()
-        Private method that handles the formatting and storage of failed 
-        test logs.
-        Thus, from each failed test, all information about the executed 
-        test is taken and added to the self.failed_tests attribute.
+    __archive()
+        Private method that handles the formatting and storage of passed
+        or failed test.
+        Thus, from each passed or failed test, all information about the 
+        executed test is taken and added to the self.passed_tests or
+        self.failed_tests attribute.
 
     """
     def __init__(self) -> None:
@@ -67,6 +67,7 @@ class Printer:
         self.test_n = 1
         self.passed_tests_n = 0
         self.failed_tests_n = 0
+        self.passed_tests = ""
         self.failed_tests = ""
         
 
@@ -98,10 +99,10 @@ class Printer:
             self.passed_tests_n += 1
         elif status == "KO":
             self.failed_tests_n += 1
-            self.__failed_test(test, bash_output, minishell_output, 
-                bash_file_content, minishell_file_content, exception,
-                bash_exit_status, minishell_exit_status)
         self.test_n += 1
+        self.__archive(test, bash_output, minishell_output, bash_file_content, 
+            minishell_file_content, exception, bash_exit_status, 
+            minishell_exit_status, status=status)
 
 
     def summary(self) -> None:
@@ -112,17 +113,60 @@ class Printer:
             f"FAILED: {self.failed_tests_n} test\s",
             color="blue"
         ))
-        if not self.failed_tests_n:
-            exit()
-        quest = ""
-        while quest != 'y' and quest != 'Y' and quest != 'n' and quest != 'N':
-            quest = input(colored(
-                "\nShow the failed tests? ([y]/n)? ", "blue"))
-        if quest == 'y' or quest == 'Y':
-            self.section("ERRORS")
-            print(colored(self.failed_tests, "red"))
-        else:
-            exit()
+        if self.failed_tests_n > 0 and self.passed_tests_n > 0:
+            quest = ""
+            while quest != '1' and quest != '2' and quest != 'n' and \
+                quest != 'N':
+                quest = input(colored(
+                    "\nPress [1] to see passed tests, [2] for tests, [n] to "
+                    "exit ([1/2]/n)? ", "blue"))
+            if quest == '1':
+                self.section("PASSED")
+                print(colored(self.passed_tests, "green"))
+                quest = ""
+                while quest != '2' and quest != 'n' and quest != 'N':
+                    quest = input(colored(
+                        "\nPress [2] to see failed tests, [n] to exit "
+                        "([2]/n)? ", "blue"))
+                if quest == '2':
+                    self.section("FAILED")
+                    print(colored(self.failed_tests, "red"))
+                else:
+                    exit()
+            elif quest == '2':
+                self.section("FAILED")
+                print(colored(self.failed_tests, "red"))
+                while quest != '1' and quest != 'n' and quest != 'N':
+                    quest = input(colored(
+                        "\nPress [1] to see passed tests, [n] to exit "
+                        "([1]/n)? ", "blue"))
+                if quest == '1':
+                    self.section("PASSED")
+                    print(colored(self.passed_tests, "green"))
+            else:
+                exit()
+        elif self.passed_tests_n > 0 and self.failed_tests_n == 0:
+            quest = ""
+            while quest != '1' and quest != 'n' and quest != 'N':
+                quest = input(colored(
+                    "\nPress [1] to see passed tests, [n] to exit "
+                    "([1]/n)? ", "blue"))
+            if quest == '1':
+                self.section("PASSED")
+                print(colored(self.passed_tests, "green"))
+            else:
+                exit()
+        elif self.passed_tests_n == 0 and self.failed_tests_n > 0:
+            quest = ""
+            while quest != '2' and quest != 'n' and quest != 'N':
+                quest = input(colored(
+                    "\nPress [2] to see failed tests, [n] to exit "
+                    "([2]/n)? ", "blue"))
+            if quest == '2':
+                self.section("FAILED")
+                print(colored(self.failed_tests, "red"))
+            else:
+                exit()
 
 
     def __banner(self) -> None:
@@ -146,33 +190,41 @@ class Printer:
 		))
     
     
-    def __failed_test(
+    def __archive(
         self, test:str, bash_output:str, minishell_output:str,
         bash_file_content:str, minishell_file_content:str, exception:str,
-        bash_exit_status:int=None, minishell_exit_status:int=None
+        bash_exit_status:int=None, minishell_exit_status:int=None, 
+        status:str="KO"
     ) -> None:
+        
+        if status == "OK":
+            archive = self.passed_tests
+        else:
+            archive = self.failed_tests
     
         test = test.replace('\n', '\\n')
-        self.failed_tests += \
-            f"\nTEST {self.test_n}: KO"\
+        archive += \
+            f"\nTEST {self.test_n}: {status}"\
             f"\n    Input:        [{test}]"
         if exception:
             error = str(exception)
             if len(error) > 52:
                 error = error[:52] + '\n' + (' ' * 17) + error[52:]
-            self.failed_tests += \
+            archive += \
                 f"\n    Exception:    {error}"
         else:
             if bash_output != None and minishell_output != None:
-                self.failed_tests += \
+                bash_output = bash_output.replace('\n', '\\n')
+                minishell_output = minishell_output.replace('\n', '\\n')
+                archive += \
                     f"\n    Bash:         [{bash_output}]"\
                     f"\n    Minishell:    [{minishell_output}]"
             if bash_exit_status != None and minishell_exit_status != None:
-                self.failed_tests += \
+                archive += \
                     f"\n    Bash $?:      [{bash_exit_status}]"\
                     f"\n    Minishell $?: [{minishell_exit_status}]"
             if bash_file_content and minishell_file_content:
-                self.failed_tests += \
+                archive += \
                     f"\n\n    Lab creation:"\
                     f"\n        cat 1 > file1"\
                     f"\n        cat 2 > file2"\
@@ -183,12 +235,16 @@ class Printer:
                     value = value.strip('\n')
                     value = value.replace('\n', '\\n')
                     value = value.replace('\x1b', '')
-                    self.failed_tests += f"\n        {key}: [{value}]"
-                self.failed_tests += \
+                    archive += f"\n        {key}: [{value}]"
+                archive += \
                     f"\n\n    Files content - Minishell:"
                 for key, value in minishell_file_content.items():
                     value = value.strip('\n')
                     value = value.replace('\n', '\\n')
                     value = value.replace('\x1b', '')
-                    self.failed_tests += f"\n        {key}: [{value}]"
-        self.failed_tests += "\n\n" + ('-' * 70) + '\n'
+                    archive += f"\n        {key}: [{value}]"
+        archive += "\n\n" + ('-' * 70) + '\n'
+        if status == "OK":
+            self.passed_tests = archive
+        else:
+            self.failed_tests = archive

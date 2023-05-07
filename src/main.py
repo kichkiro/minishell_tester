@@ -43,6 +43,8 @@ def main():
     commands = Tester(project_path, exe, "commands", printer)
     redirect = Tester(project_path, exe, "redirects", printer)
     exit_status = Tester(project_path, exe, "exit_status", printer)
+    booleans = Tester(project_path, exe, "booleans", printer)
+    wildcards = Tester(project_path, exe, "wildcards", printer)
 
     # PRE-TEST --------------------------------------------------------------->
 
@@ -50,25 +52,35 @@ def main():
     utils.makefile("", True, project_path)
     utils.norminette(project_path)
 
-    # ECHO TEST -------------------------------------------------------------->
+    # PARSING ---------------------------------------------------------------->
 
     printer.section("Parsing")
     parsing.run()
 
-    # COMMANDS TEST ---------------------------------------------------------->
+    # COMMANDS --------------------------------------------------------------->
 
     printer.section("Commands")
     commands.run()
 
-    # REDIRECTS TEST --------------------------------------------------------->
+    # REDIRECTS -------------------------------------------------------------->
 
     printer.section("Redirects")
     redirect.run()
 
-    # Exit Status ------------------------------------------------------------>
+    # EXIT STATUS ------------------------------------------------------------>
 
     printer.section("Exit Status")
     exit_status.run()
+
+    # BOOLEANS --------------------------------------------------------------->
+
+    printer.section("Booleans")
+    booleans.run()
+
+    # WILDCARDS -------------------------------------------------------------->
+
+    printer.section("Wildcards")
+    wildcards.run()
 
     # SUMMARY ---------------------------------------------------------------->
 

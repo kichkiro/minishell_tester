@@ -54,28 +54,32 @@ class Tester:
         -> None:
 
         self.project_path = project_path
+        self.cmd = ([f"{project_path}/{exe}"])
         self.printer = printer
         if test == "parsing":
             self.name = "parsing"
-            self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.parsing
-            self.tester = self.__commands
+            self.tester = self.__standard_tester
         elif test == "commands":
             self.name = "commands"
-            self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.commands
-            self.tester = self.__commands
+            self.tester = self.__standard_tester
         elif test == "redirects":
             self.name = "redirects"
-            self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.redirects
             self.tester = self.__redirects
         elif test == "exit_status":
             self.name = "exit_status"
-            self.cmd = ([f"{project_path}/{exe}"])
             self.tests = tests.exit_status
             self.tester = self.__exit_status
-
+        elif test == "booleans":
+            self.name = "booleans"
+            self.tests = tests.booleans
+            self.tester = self.__standard_tester
+        elif test == "wildcards":
+            self.name = "wildcards"
+            self.tests = tests.wildcards
+            self.tester = self.__wildcards
 
     def run(self) -> None:
 
@@ -93,6 +97,10 @@ class Tester:
                     self.tester(process, test, loop, lab)
                 elif self.name == "exit_status":
                     self.tester(process, test, loop, lab)
+                elif self.name == "booleans":
+                    self.tester(process, test, loop)
+                elif self.name == "wildcards":
+                    self.tester(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
@@ -100,7 +108,7 @@ class Tester:
                 loop += 1
     
 
-    def __commands(self, process: Popen, test: str, loop: int) -> None:
+    def __standard_tester(self, process: Popen, test: str, loop: int) -> None:
 
         bash_out = process.get_bash_output(test)
         minishell_out = process.get_minishell_output(
@@ -167,3 +175,21 @@ class Tester:
             self.printer.result("KO", loop, test,
                 bash_exit_status=process.exit_status_bash,
                 minishell_exit_status=process.exit_status_minishell)
+
+
+    def __wildcards(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+        
+        files, dirs = lab.create_wildcards_lab()
+        bash_out = process.get_bash_output(test)
+        minishell_out = process.get_minishell_output(bash_out, test, loop, False)
+        lab.remove_wildcards_lab(files, dirs)
+        if minishell_out == None:
+            return
+        bash_output = sorted(bash_out.split())
+        minishell_output = sorted(minishell_out.split())
+
+        if all(elem in minishell_output for elem in bash_output) and \
+            all(elem in bash_output for elem in minishell_output):
+            self.printer.result("OK", loop, test, bash_out, minishell_out)
+        else:
+            self.printer.result("KO", loop, test, bash_out, minishell_out)

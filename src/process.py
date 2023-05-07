@@ -78,7 +78,7 @@ class Process():
                 executable=shutil.which("bash"),
                 text=True,
                 universal_newlines=True,
-                stderr=subprocess.STDOUT
+                stderr=subprocess.DEVNULL,
             )
         except subprocess.CalledProcessError as e:
             self.exit_status_bash = e.returncode
