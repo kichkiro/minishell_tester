@@ -99,10 +99,10 @@ class Printer:
             self.passed_tests_n += 1
         elif status == "KO":
             self.failed_tests_n += 1
-        self.test_n += 1
         self.__archive(test, bash_output, minishell_output, bash_file_content, 
             minishell_file_content, exception, bash_exit_status, 
             minishell_exit_status, status=status)
+        self.test_n += 1
 
 
     def summary(self) -> None:
@@ -118,7 +118,7 @@ class Printer:
             while quest != '1' and quest != '2' and quest != 'n' and \
                 quest != 'N':
                 quest = input(colored(
-                    "\nPress [1] to see passed tests, [2] for tests, [n] to "
+                    "\nPress [1] to see passed tests, [2] for failed, [n] to "
                     "exit ([1/2]/n)? ", "blue"))
             if quest == '1':
                 self.section("PASSED")

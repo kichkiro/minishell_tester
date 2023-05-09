@@ -117,6 +117,39 @@ redirects = [
     "cat file1 < /etc/passwd >> file1 >> file2 >> file3 >> file4",
 ]
 
+pipes = [
+    "ls / | grep etc",
+    "ls / | grep etc | echo 42",
+    "ls / | wc -l",
+    "ls / | head -n 5",
+    "ls -l / | grep home",
+    "ls -l / | grep home | wc -l",
+    "cat /etc/passwd | grep bash",
+    "cat /etc/passwd | grep bash | wc -l",
+    "echo \"Hello, World!\" | wc -w",
+    "echo \"Hello, World!\" | sed 's/World/Universe/g'",
+    "echo \"Hello, World!\" | cut -d \" \" -f 4",
+    "echo \"Hello, World!\" | cut -d \" \" -f 4-6",
+    "echo \"Hello, World!\" | cut -c 5-15",
+    "ps -ef | grep apache | grep -v grep",
+    "echo 1 | echo 2 | echo 3 | echo 4 | echo 5 | echo 6 | echo 7",
+    "echo 1 | echo 2 | echo 3 | echo 4 | echo 42 | grep 2",
+    "echo $SHELL | sed 's/.*/\L&/'",
+    "echo $LOGNAME | sed 's/.*/\L&/'",
+    "echo \"$USER\" 42 \"'$SHELL'\" | grep bash | wc -l",
+    "echo \"$USER\" 42 \"'$SHELL'\" | grep bash | wc -l | echo 42",
+    "echo \"$USER\" 42 \"'$SHELL'\" | echo 42",
+    "ls / | grep etc | echo 42 | ls / | grep etc | echo 42 | echo 21",
+    "ls -al / | grep e | wc -l",
+    "ls -al / | grep e | wc -l | echo 42",
+    "ls -a -l / | wc -l",
+    "echo '$USER' | grep $USER",
+    "echo '$USER' | grep $USER | echo 42",
+    "echo \"'$SHELL'\" | grep bash",
+    "echo \"'$SHELL'\" | grep bash | grep b",
+    "echo ''$USER'' | grep $USER",
+]
+
 exit_status = [
     "echo 42",
     "cat 42 > not_executable_file",
@@ -132,7 +165,7 @@ exit_status = [
     # "| echo 1 | echo 2",
 ]
 
-mixed = [
+mix_mandatory = [
     "ls -al -i < /etc/passwd",
     "ls -al -i < /etc/passwd > file1",
     "ls -al -i < /etc/passwd > file1 > file2",
@@ -141,6 +174,16 @@ mixed = [
     "wc -l < /etc/passwd > file1 > file2 > file3 > file4",
     "wc -l < /etc/passwd",
     "wc -l < /etc/passwd",
+    "wc -l < /etc/passwd > file1 | wc -l",
+    "ls -al -i < /etc/passwd > file1 | wc -l | echo 42",
+    "cat < file1 | cat > file2",
+    "cat < file1 | grep 1 > file2 | wc -l",
+    "cat < file1 | grep 1 > file2 | wc -l | echo 42",
+    "cat < file1 | grep 1 > file2 | wc -l | echo 42 | echo 21",
+    "> file1 | echo 42 | cat < file1 | grep 1 > file2 | wc -l",
+    "< file1 | echo 42 > file2 | grep 1 | wc -l",
+    "cat < file1 | cat > file2 < file1 | wc -l",
+
 ]
 
 booleans = [
@@ -171,13 +214,13 @@ booleans = [
     "(echo 1 || echo 2) && echo 3 || echo 4",
     "echo 1 && (echo 2 || echo 3) && () && echo 4",
     "((echo 1 && echo 2) || (echo 3 || echo 4)) && (echo 5 && echo 6)",
-    "(echo 1 && echo 2) || ((echo 3 || echo 4) && (echo 5 || echo 6)) || \
-        (echo 7 && echo 8)",
-    "echo 1 && (echo 2 || echo 3) && (echo 4 || (echo 5 && (echo 6 || echo 7 \
-        && (echo 8 || (echo 9 && echo 10)))))",
-    "echo 1 || (echo 2 || echo 3 || echo 4 || echo 5 || echo 6 || echo 7 || \
-        echo 8 || echo 9 || echo 10 || echo 11 || echo 12 || echo 13 || echo \
-        14 || echo 15 || echo 16 || echo 17 || echo 18 || echo 19 || echo 20)",
+    "(echo 1 && echo 2) || ((echo 3 || echo 4) && (echo 5 || echo 6)) || "
+        "(echo 7 && echo 8)",
+    "echo 1 && (echo 2 || echo 3) && (echo 4 || (echo 5 && (echo 6 || echo 7 "
+        "&& (echo 8 || (echo 9 && echo 10)))))",
+    "echo 1 || (echo 2 || echo 3 || echo 4 || echo 5 || echo 6 || echo 7 || "
+        "echo 8 || echo 9 || echo 10 || echo 11 || echo 12 || echo 13 || echo "
+        "14 || echo 15 || echo 16 || echo 17 || echo 18 || echo 19 || echo 20)"
 ]
 
 wildcards = [
@@ -203,8 +246,12 @@ wildcards = [
     "echo **1**",
     "echo d*fi*",
     "echo *42 *21",
-
-
-    
-
+    "echo *~",
+    "ls -al 42*42",
+    "echo *1 *2 *3 *4 *5 *6 *7 *8 *9 *10 *11 *12 *13 *14 *15 *16 *17 *18 *19 ",
+    "echo *1 file1 file2 directory1 directory2 *",
+    "ls -al *1 file1 file2 directory1 directory2 *",
+    "echo *1 file* f*2 d***ct*y* d*r*ory2 *2",
+    "ls -al *1 file* f*2 d***ct*y* d*r*ory2 *2",
+    "echo *1 file* f*2 d***ct*y* d*r*ory2 *2 *3 *4 *5 *6 *7 *8 *9 *10 *11 *12"
 ]

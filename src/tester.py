@@ -59,23 +59,31 @@ class Tester:
         if test == "parsing":
             self.name = "parsing"
             self.tests = tests.parsing
-            self.tester = self.__standard_tester
+            self.tester = self.__exec
         elif test == "commands":
             self.name = "commands"
             self.tests = tests.commands
-            self.tester = self.__standard_tester
+            self.tester = self.__exec
         elif test == "redirects":
             self.name = "redirects"
             self.tests = tests.redirects
             self.tester = self.__redirects
+        elif test == "pipes":
+            self.name = "pipes"
+            self.tests = tests.pipes
+            self.tester = self.__exec
         elif test == "exit_status":
             self.name = "exit_status"
             self.tests = tests.exit_status
             self.tester = self.__exit_status
+        elif test == "mix_mandatory":
+            self.name = "mix_mandatory"
+            self.tests = tests.mix_mandatory
+            self.tester = self.__redirects
         elif test == "booleans":
             self.name = "booleans"
             self.tests = tests.booleans
-            self.tester = self.__standard_tester
+            self.tester = self.__exec
         elif test == "wildcards":
             self.name = "wildcards"
             self.tests = tests.wildcards
@@ -95,7 +103,11 @@ class Tester:
                     self.tester(process, test, loop)
                 elif self.name == "redirects":
                     self.tester(process, test, loop, lab)
+                elif self.name == "pipes":
+                    self.tester(process, test, loop)
                 elif self.name == "exit_status":
+                    self.tester(process, test, loop, lab)
+                elif self.name == "mix_mandatory":
                     self.tester(process, test, loop, lab)
                 elif self.name == "booleans":
                     self.tester(process, test, loop)
@@ -108,7 +120,7 @@ class Tester:
                 loop += 1
     
 
-    def __standard_tester(self, process: Popen, test: str, loop: int) -> None:
+    def __exec(self, process: Popen, test: str, loop: int) -> None:
 
         bash_out = process.get_bash_output(test)
         minishell_out = process.get_minishell_output(
