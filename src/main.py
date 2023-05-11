@@ -47,6 +47,7 @@ def main():
     mix_mandatory = Tester(project_path, exe, "mix_mandatory", printer)
     booleans = Tester(project_path, exe, "booleans", printer)
     wildcards = Tester(project_path, exe, "wildcards", printer)
+    mix_bonus = Tester(project_path, exe, "mix_bonus", printer)
 
     # PRE-TEST --------------------------------------------------------------->
 
@@ -93,6 +94,11 @@ def main():
 
     printer.section("Wildcards")
     wildcards.run()
+
+    # MIX BONUS -------------------------------------------------------------->
+
+    printer.section("Mix Bonus")
+    mix_bonus.run()
 
     # SUMMARY ---------------------------------------------------------------->
 

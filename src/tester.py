@@ -53,41 +53,28 @@ class Tester:
     def __init__(self, project_path:str, exe:str, test:str, printer:Printer) \
         -> None:
 
+        self.name = test
         self.project_path = project_path
         self.cmd = ([f"{project_path}/{exe}"])
         self.printer = printer
         if test == "parsing":
-            self.name = "parsing"
             self.tests = tests.parsing
-            self.tester = self.__exec
         elif test == "commands":
-            self.name = "commands"
             self.tests = tests.commands
-            self.tester = self.__exec
         elif test == "redirects":
-            self.name = "redirects"
             self.tests = tests.redirects
-            self.tester = self.__redirects
         elif test == "pipes":
-            self.name = "pipes"
             self.tests = tests.pipes
-            self.tester = self.__exec
         elif test == "exit_status":
-            self.name = "exit_status"
             self.tests = tests.exit_status
-            self.tester = self.__exit_status
         elif test == "mix_mandatory":
-            self.name = "mix_mandatory"
             self.tests = tests.mix_mandatory
-            self.tester = self.__redirects
         elif test == "booleans":
-            self.name = "booleans"
             self.tests = tests.booleans
-            self.tester = self.__exec
         elif test == "wildcards":
-            self.name = "wildcards"
             self.tests = tests.wildcards
-            self.tester = self.__wildcards
+        elif test == "mix_bonus":
+            self.tests = tests.mix_bonus
 
     def run(self) -> None:
 
@@ -98,21 +85,23 @@ class Tester:
             process = Process(self.cmd, self.printer)
             try:
                 if self.name == "parsing":
-                    self.tester(process, test, loop)
+                    self.__exec(process, test, loop)
                 elif self.name == "commands":
-                    self.tester(process, test, loop)
+                    self.__exec(process, test, loop)
                 elif self.name == "redirects":
-                    self.tester(process, test, loop, lab)
+                    self.__exec2(process, test, loop, lab)
                 elif self.name == "pipes":
-                    self.tester(process, test, loop)
+                    self.__exec2(process, test, loop, lab)
                 elif self.name == "exit_status":
-                    self.tester(process, test, loop, lab)
+                    self.__exitstatus(process, test, loop, lab)
                 elif self.name == "mix_mandatory":
-                    self.tester(process, test, loop, lab)
+                    self.__exec2(process, test, loop, lab)
                 elif self.name == "booleans":
-                    self.tester(process, test, loop)
+                    self.__exec(process, test, loop)
                 elif self.name == "wildcards":
-                    self.tester(process, test, loop, lab)
+                    self.__wildcards(process, test, loop, lab)
+                elif self.name == "mix_bonus":
+                    self.__exec2(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
@@ -137,8 +126,8 @@ class Tester:
             self.printer.result("KO", loop, test, bash_out, minishell_out)
 
 
-    def __redirects(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
-        
+    def __exec2(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+
         test_files = lab.create_redirects_lab()
         bash_out = process.get_bash_output(test)
         bash_file_content = {}
@@ -148,8 +137,8 @@ class Tester:
         lab.remove_redirects_lab(test_files)
         
         test_files = lab.create_redirects_lab()
-        minishell_out = process.get_minishell_output(
-            bash_out, test, loop, False)
+        minishell_out = process.get_minishell_output_pty(
+            bash_out, test, loop)
         if minishell_out == None:
             return
         minishell_file_content = {}        
@@ -170,11 +159,11 @@ class Tester:
                 minishell_out, bash_file_content, minishell_file_content)
 
 
-    def __exit_status(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+    def __exitstatus(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
 
         file = lab.create_exit_status_lab()
         bash_out = process.get_bash_output(test)
-        minishell_out = process.get_minishell_output(bash_out, test, loop, True)
+        minishell_out = process.get_minishell_output(bash_out, test, loop, 1)
         lab.remove_exit_status_lab(file)
         if minishell_out == None:
             return
@@ -193,7 +182,7 @@ class Tester:
         
         files, dirs = lab.create_wildcards_lab()
         bash_out = process.get_bash_output(test)
-        minishell_out = process.get_minishell_output(bash_out, test, loop, False)
+        minishell_out = process.get_minishell_output(bash_out, test, loop, 0)
         lab.remove_wildcards_lab(files, dirs)
         if minishell_out == None:
             return

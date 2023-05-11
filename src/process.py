@@ -8,6 +8,10 @@ streams.
 
 # Libraries ------------------------------------------------------------------>
 
+import os
+import re
+import pty
+import time
 import signal
 import shutil
 import threading
@@ -153,4 +157,41 @@ class Process():
                 self.printer.result("KO", loop, input, exception=e)
             return None
 
+        return minishell_out
+
+
+    def get_minishell_output_pty(self, bash_output:str, input:str, \
+        loop:int) -> str:
+        
+        master, slave = pty.openpty()
+        process_pty = subprocess.Popen(
+            self.args,
+            stdin=slave,
+            stdout=slave,
+            stderr=slave,
+            universal_newlines=True,
+        )
+
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*[mK]')
+        input += '\n'
+        os.write(master, input.encode())
+        time.sleep(0.5)
+        tmp = ansi_escape.sub('', os.read(master, 1024).decode())
+        tmp = tmp[tmp.find(input) + len(input):]
+        tmp = tmp[tmp.find(input.strip('\n')) + len(input):]
+
+        minishell_out = ""
+        for line in tmp.split('\n'):
+            if minishell_out.count('\n') == bash_output.count('\n') + 1: 
+                break
+            minishell_out += line + '\n'
+        minishell_out = minishell_out.strip('\n')
+        minishell_out = minishell_out.replace('\r', '')
+        minishell_out = minishell_out.replace('\x1b', '')
+        minishell_out = minishell_out.replace('[?2004l', '')
+
+        process_pty.kill()
+        os.close(slave)
+        os.close(master)
+        
         return minishell_out

@@ -57,11 +57,6 @@ commands = [
     f"{which('ls')} -al -i",
     f"{which('ls')} -al -i -t",
     f"{which('ls')} -al -i -t -v",
-    f"{which('cat')} /etc/passwd",
-    f"{which('cat')} /etc/passwd -n",
-    f"{which('cat')} /etc/passwd -n -e",
-    f"{which('cat')} /etc/passwd -n -e -t",
-    f"{which('cat')} /etc/passwd -n -e -t -v",
     f"{which('wc')} -l /etc/passwd",
     f"{which('wc')} -l /etc/passwd -m",
     f"{which('wc')} -l /etc/passwd -m -w",
@@ -72,16 +67,21 @@ commands = [
     "ls -al -i",
     "ls -al -i -t",
     "ls -al -i -t -v",
-    "cat /etc/passwd",
-    "cat /etc/passwd -n",
-    "cat /etc/passwd -n -e",
-    "cat /etc/passwd -n -e -t",
-    "cat /etc/passwd -n -e -t -v",
     "wc -l /etc/passwd",
     "wc -l /etc/passwd -m",
     "wc -l /etc/passwd -m -w",
     "wc -l /etc/passwd -m -w -c",
     "wc -l /etc/passwd -m -w -c -l",
+    "which ls",
+    "which ls -al",
+    "which ls -al -i",
+    "which ls -al -i -t",
+    "which ls -al -i -t -v",
+    "which wc -l /etc/passwd",
+    "which wc -l /etc/passwd -m",
+    "which wc -l /etc/passwd -m -w",
+    "which wc -l /etc/passwd -m -w -c",
+    "which wc -l /etc/passwd -m -w -c -l",
 ]
 
 redirects = [
@@ -90,6 +90,8 @@ redirects = [
     ">> file1",
     "< file1 > file2",
     "< file1 >> file2",
+    "< file1 > file2 > file3 >> file4",
+    "> file1 > file2 > file3 > file4",
     "cat < file1",
     "cat < file1 > file2 > file3",
     "cat < file1 >> file2 >> file3",
@@ -106,14 +108,12 @@ redirects = [
     "cat >> file1 > file2 < file3 < file4",
     "cat >> file1 >> file2 < file3 < file4",
     "cat >> file1 >> file2 >> file3 < file4",
-    "cat /etc/passwd < /etc/passwd",
     "cat /etc/passwd < /etc/passwd > file1",
     "cat /etc/passwd < /etc/passwd > file1 > file2",
     "cat /etc/passwd < /etc/passwd > file1 > file2 > file3",
     "cat file1 < /etc/passwd > file1 > file2 > file3",
     "cat file1 < /etc/passwd > file1 > file2 > file3 > file4",
     "cat file1 < /etc/passwd >> file1 >> file2",
-    "cat file1 < /etc/passwd >> file1 >> file2 >> file3",
     "cat file1 < /etc/passwd >> file1 >> file2 >> file3 >> file4",
 ]
 
@@ -161,8 +161,12 @@ exit_status = [
     ">> not_existing_file",
     "< not_existing_file > not_existing_file2",
     "< not_existing_file >> not_existing_file2",
-    # "| echo 1"
-    # "| echo 1 | echo 2",
+    "| echo 1",
+    "| echo 1 | echo 2",
+    "ls not_existing_file",
+    "ls not_existing_file | echo 42 | cat",
+    "ls not_existing_file | cat > not_executable_file",
+
 ]
 
 mix_mandatory = [
@@ -171,10 +175,9 @@ mix_mandatory = [
     "ls -al -i < /etc/passwd > file1 > file2",
     "ls -al -i < /etc/passwd > file1 > file2 > file3",
     "ls -al -i < /etc/passwd > file1 > file2 > file3 > file4",
-    "wc -l < /etc/passwd > file1 > file2 > file3 > file4",
-    "wc -l < /etc/passwd",
     "wc -l < /etc/passwd",
     "wc -l < /etc/passwd > file1 | wc -l",
+    "wc -l < /etc/passwd > file1 > file2 > file3 > file4",
     "ls -al -i < /etc/passwd > file1 | wc -l | echo 42",
     "cat < file1 | cat > file2",
     "cat < file1 | grep 1 > file2 | wc -l",
@@ -183,7 +186,20 @@ mix_mandatory = [
     "> file1 | echo 42 | cat < file1 | grep 1 > file2 | wc -l",
     "< file1 | echo 42 > file2 | grep 1 | wc -l",
     "cat < file1 | cat > file2 < file1 | wc -l",
-
+    "echo 42 > file1 | cat | wc -l",
+    "echo 42 < file1 | cat | wc -l",
+    ">> file1 | cat",
+    ">> file1 | echo 42",
+    "> file1 | cat < file1",
+    "> file1 | echo 42 < file1 | cat file1",    
+    "echo 42 | wc -l | cat > file1",
+    "echo 42 | cat | cat | cat | cat",
+    "echo 42 | cat | cat | cat | cat | echo 21",
+    "cat < file1 >> file 2 > file1 | cat",
+    "cat < file1 >> file 2 > file1 | cat | echo 21",
+    "ls / | grep c | cat > file1",
+    "ls / | grep home | wc -l",
+    "ls / | grep home | wc -l | < file1 > file2 | cat",
 ]
 
 booleans = [
@@ -254,4 +270,18 @@ wildcards = [
     "echo *1 file* f*2 d***ct*y* d*r*ory2 *2",
     "ls -al *1 file* f*2 d***ct*y* d*r*ory2 *2",
     "echo *1 file* f*2 d***ct*y* d*r*ory2 *2 *3 *4 *5 *6 *7 *8 *9 *10 *11 *12"
+]
+
+mix_bonus = [
+    "echo * | cat > file1",
+    "echo * | cat > file1 | cat < file1",
+    "echo * | cat > file1 | cat < file1 | cat > file2",
+    "echo *** | cat > file1",
+    "ls * | grep 1",
+    "ls *** | grep 1",
+    "ls *1 | grep file",
+    "(echo f*l*********1 && ls not_dir) | cat > file1 && echo 21 || echo 42",
+    "(((echo ***1 || ls not_dir) && cat < file1 | cat > file2 || ls ***",
+    "echo *1 | cat > file1 && grep * | cat > file2 | cat < file2",
+    
 ]
