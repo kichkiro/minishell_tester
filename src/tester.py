@@ -9,6 +9,7 @@ results.
 
 import os
 from subprocess import Popen
+from typing import List
 
 from termcolor import colored
 import tests
@@ -22,7 +23,7 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
@@ -30,11 +31,16 @@ class Tester:
     """
     Attributes
     --------------------------------------------------------------------
+    name : str
+        The name of the test.
     project_path : str
-        The path to the project to be tested.
-
-    test : str
-        The name of the test to run.
+        The path to the project directory.
+    cmd : List[str]
+        The command to run the executable.
+    printer : Printer
+        The printer object.
+    tests : List[str]
+        The list of tests to run.
 
     Methods
     --------------------------------------------------------------------
@@ -53,9 +59,15 @@ class Tester:
     def __init__(self, project_path:str, exe:str, test:str, printer:Printer) \
         -> None:
 
+        self.name:str
+        self.project_path:str
+        self.cmd:str
+        self.printer:Printer
+        self.tests:List[str]
+
         self.name = test
         self.project_path = project_path
-        self.cmd = ([f"{project_path}/{exe}"])
+        self.cmd = f"{project_path}/{exe}"
         self.printer = printer
         if test == "parsing":
             self.tests = tests.parsing
@@ -77,6 +89,11 @@ class Tester:
             self.tests = tests.mix_bonus
 
     def run(self) -> None:
+
+        loop:int
+        test:str
+        lab:Lab
+        process:Process
 
         loop = 0
         for test in self.tests:
@@ -109,7 +126,10 @@ class Tester:
                 loop += 1
     
 
-    def __exec(self, process: Popen, test: str, loop: int) -> None:
+    def __exec(self, process:Process, test:str, loop:int) -> None:
+
+        bash_out:str
+        minishell_out:str|None
 
         bash_out = process.get_bash_output(test)
         minishell_out = process.get_minishell_output(
@@ -126,7 +146,13 @@ class Tester:
             self.printer.result("KO", loop, test, bash_out, minishell_out)
 
 
-    def __exec2(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+    def __exec2(self, process:Process, test:str, loop:int, lab:Lab) -> None:
+
+        test_files:List[str]
+        bash_out:str
+        minishell_out:str
+        bash_file_content:dict
+        minishell_file_content:dict
 
         test_files = lab.create_redirects_lab()
         bash_out = process.get_bash_output(test)
@@ -159,11 +185,17 @@ class Tester:
                 minishell_out, bash_file_content, minishell_file_content)
 
 
-    def __exitstatus(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+    def __exitstatus(self, process:Process, test:str, loop:int, lab:Lab)\
+        -> None:
+
+        file:str
+        bash_out:str
+        minishell_out:str|None
 
         file = lab.create_exit_status_lab()
         bash_out = process.get_bash_output(test)
-        minishell_out = process.get_minishell_output(bash_out, test, loop, 1)
+        minishell_out = process.get_minishell_output(
+            bash_out, test, loop, True)
         lab.remove_exit_status_lab(file)
         if minishell_out == None:
             return
@@ -178,11 +210,18 @@ class Tester:
                 minishell_exit_status=process.exit_status_minishell)
 
 
-    def __wildcards(self, process:Popen, test:str, loop:int, lab:Lab) -> None:
+    def __wildcards(self, process:Process, test:str, loop:int, lab:Lab)\
+        -> None:
         
+        files:List[str]
+        dirs:List[str]
+        bash_out:str
+        minishell_out:str|None
+
         files, dirs = lab.create_wildcards_lab()
         bash_out = process.get_bash_output(test)
-        minishell_out = process.get_minishell_output(bash_out, test, loop, 0)
+        minishell_out = process.get_minishell_output(
+            bash_out, test, loop, False)
         lab.remove_wildcards_lab(files, dirs)
         if minishell_out == None:
             return

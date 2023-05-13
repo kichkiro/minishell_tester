@@ -17,7 +17,14 @@ python3 src/main.py [project path]
 - [v] - Commands
 - [v] - Redirects
 - [v] - Exit status
-- [ ] - Builtins
-- [ ] - Pipe
+- [V] - Pipe
 - [V] - Wildcards
 - [V] - Booleans
+
+## 🪲 - Report bugs
+To report bugs or recommend improvements, contact me:
+- Slack: <b>kichkiro</b>
+- E-Mail: <b>kichkiro@student.42firenze.it</b>  
+
+## ⚖️ - License
+See [LICENSE](LICENSE)

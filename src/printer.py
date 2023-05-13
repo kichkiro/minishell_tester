@@ -14,7 +14,7 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
@@ -33,6 +33,9 @@ class Printer:
 
     failed_tests : str
         String containing logs of failed tests.
+
+    passed_tests : str
+        String containing logs of passed tests.
 
     Methods
     --------------------------------------------------------------------
@@ -63,6 +66,12 @@ class Printer:
     """
     def __init__(self) -> None:
 
+        self.test_n:int
+        self.passed_tests_n:int
+        self.failed_tests_n:int
+        self.passed_tests:str
+        self.failed_tests:str
+
         self.__banner()
         self.test_n = 1
         self.passed_tests_n = 0
@@ -73,17 +82,23 @@ class Printer:
 
     def section(self, msg:str) -> None:
 
+        dashes:str
+
         dashes = '-' * (73 - len(msg))
         print(colored(f"\n{msg} {dashes}>\n", "white", attrs=["bold"]))
         
 
     def result(
-        self, status:str, loop:int, test:str, bash_output:str=None,
-        minishell_output:str=None, bash_file_content:str=None,
-        minishell_file_content:str=None, exception:str=None, 
-        bash_exit_status:int=None, minishell_exit_status:int=None
+        self, status:str, loop:int, test:str, bash_output:str|None=None,
+        minishell_output:str|None=None, bash_file_content:dict|None=None,
+        minishell_file_content:dict|None=None, exception:str|None=None, 
+        bash_exit_status:int|None=None, minishell_exit_status:int|None=None
     ) -> None:
         
+        color:str
+        end:str
+        extra_space:str
+
         color = "green" if status == "OK" else "red"
         end = '\n' if (loop + 1) % 5 == 0 else ''
         extra_space = ''
@@ -99,18 +114,20 @@ class Printer:
             self.passed_tests_n += 1
         elif status == "KO":
             self.failed_tests_n += 1
-        self.__archive(test, bash_output, minishell_output, bash_file_content, 
-            minishell_file_content, exception, bash_exit_status, 
-            minishell_exit_status, status=status)
+        self.__archive(test, status, bash_output, minishell_output, 
+            bash_file_content, minishell_file_content, exception,
+            bash_exit_status, minishell_exit_status)
         self.test_n += 1
 
 
     def summary(self) -> None:
+
+        quest:str
        
         self.section("SUMMARY")
         print(colored(
-            f"PASSED: {self.passed_tests_n} test\s\n"
-            f"FAILED: {self.failed_tests_n} test\s",
+            f"PASSED: {self.passed_tests_n} tests\n"
+            f"FAILED: {self.failed_tests_n} tests",
             color="blue"
         ))
         if self.failed_tests_n > 0 and self.passed_tests_n > 0:
@@ -191,11 +208,14 @@ class Printer:
     
     
     def __archive(
-        self, test:str, bash_output:str, minishell_output:str,
-        bash_file_content:str, minishell_file_content:str, exception:str,
-        bash_exit_status:int=None, minishell_exit_status:int=None, 
-        status:str="KO"
+        self, test:str, status:str, bash_output:str|None, 
+        minishell_output:str|None, bash_file_content:dict|None, 
+        minishell_file_content:dict|None, exception:str|None, 
+        bash_exit_status:int|None=None, minishell_exit_status:int|None=None
     ) -> None:
+        
+        archive:str
+        error:str
         
         if status == "OK":
             archive = self.passed_tests

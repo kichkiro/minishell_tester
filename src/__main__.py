@@ -8,6 +8,7 @@ Tester for the Minishell project of school 42.
 
 import os
 import sys
+from typing import List
 
 from termcolor import colored
 import utils
@@ -20,14 +21,33 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
-def main():
+def main(argv: List[str]) -> None:
     """
+    This is the main function of the program.
+
+    Params:
+        argv : List[str]
+            The list of arguments passed to the program.
+
+    Returns:
+        None
     """
-    argv = sys.argv
+    project_path:str
+    exe:str
+    printer:Printer
+    parsing:Tester
+    commands:Tester
+    redirect:Tester
+    pipes:Tester
+    exit_status:Tester
+    mix_mandatory:Tester
+    booleans:Tester
+    wildcards:Tester
+    mix_bonus:Tester
 
     if len(argv) != 2:
         print(colored("\nWrong input arguments...\n", "red", attrs=["bold"]),
@@ -35,8 +55,8 @@ def main():
         print(colored("[project_path]\n", "white"), file=sys.stderr)
         exit()
 
-    project_path = os.path.abspath(argv[1])
-    exe = "minishell"
+    project_path:str = os.path.abspath(argv[1])
+    exe:str = "minishell"
 
     printer = Printer()
     parsing = Tester(project_path, exe, "parsing", printer)
@@ -105,4 +125,4 @@ def main():
     printer.summary()
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

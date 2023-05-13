@@ -16,7 +16,7 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
@@ -25,13 +25,18 @@ def makefile(rules:str, must_print:bool, project_path:str):
     Run the make command with specified rules on a given project path.
     
     Params:
-        rules (str): The makefile rules to run.
-        must_print (bool): Whether to print output or not.
-        project_path (str): The path to the project directory.
+        rules : str
+            The makefile rules to run.
+        must_print : bool
+            Whether to print output or not.
+        project_path : str
+            The path to the project directory.
 
     Returns:
         None
     """
+    process:subprocess.Popen
+
     if rules != "":
         process = subprocess.Popen(
             ["make", rules, "-C", project_path], 
@@ -56,11 +61,14 @@ def norminette(project_path: str):
     """
     Run the norminette command on a given project path.
 
-    Args:
-        project_path (str): The path to the project directory.
+    Params:
+        project_path:str
+            The path to the project directory.
     Returns:
         None
     """
+    process:subprocess.Popen
+
     process = subprocess.Popen(
         ["norminette", project_path],
         stdout=subprocess.PIPE, 

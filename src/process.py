@@ -16,6 +16,7 @@ import signal
 import shutil
 import threading
 import subprocess
+from typing import List
 
 from printer import Printer
 
@@ -25,7 +26,7 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
@@ -33,11 +34,20 @@ class Process():
     """
     Attributes
     --------------------------------------------------------------------
+    args : str
+        The command to run.
+
     process : subprocess.Popen
         The Popen object representing the process.
 
     printer : Printer
         The Printer object used for logging.
+
+    exit_status_bash : int
+        The exit status of the bash process.
+    
+    exit_status_minishell : int
+        The exit status of the minishell process.
 
     Methods
     --------------------------------------------------------------------
@@ -56,10 +66,20 @@ class Process():
 
         If the get_exit_status argument is True, it performs a recursion 
         to get the output of "echo $?" on the same minishell instance.
+
+    get_minishell_output_pty():
+        ...
     """
     def __init__(self, args:str, printer:Printer) -> None:
+
+        self.args:str
+        self.process:subprocess.Popen
+        self.printer:Printer
+        self.exit_status_bash:int
+        self.exit_status_minishell:int
+
         self.args = args
-        self.process = subprocess.Popen(
+        self.process:subprocess.Popen = subprocess.Popen(
             args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -73,6 +93,8 @@ class Process():
 
 
     def get_bash_output(self, input:str) -> str:
+
+        bash_output:str
         
         bash_output = ""
         try:
@@ -91,9 +113,16 @@ class Process():
 
 
     def get_minishell_output(self, bash_output:str, input:str, loop:int, \
-        get_exit_status:bool) -> str:
+        get_exit_status:bool) -> str|None:
        
+        minishell_out:str
+        counter:int
+        tmp:List[str]
+
         def read_thread(self, tmp:list):
+
+            line:str
+
             line = ""
             try:
                 line = self.process.stdout.readline()
@@ -162,6 +191,13 @@ class Process():
 
     def get_minishell_output_pty(self, bash_output:str, input:str, \
         loop:int) -> str:
+
+        master:int
+        slave:int
+        process_pty:subprocess.Popen
+        ansi_escape:re.Pattern
+        minishell_out:str
+        tmp:str
         
         master, slave = pty.openpty()
         process_pty = subprocess.Popen(

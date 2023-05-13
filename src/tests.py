@@ -6,6 +6,7 @@ Arguments for testing.
 
 # Libraries ------------------------------------------------------------------>
 
+from typing import List
 from shutil import which
 
 # Authorship ----------------------------------------------------------------->
@@ -14,9 +15,19 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # TESTS ---------------------------------------------------------------------->
+
+parsing:List[str]
+commands:List[str]
+redirects:List[str]
+pipes:List[str]
+exit_status:List[str]
+mix_mandatory:List[str]
+booleans:List[str]
+wildcards:List[str]
+mix_bonus:List[str]
 
 parsing = [
     "echo ",

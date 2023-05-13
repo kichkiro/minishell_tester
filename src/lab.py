@@ -10,6 +10,7 @@ removing temporary directories used during testing.
 import os
 import shutil
 import tempfile
+from typing import List
 
 # Authorship ----------------------------------------------------------------->
 
@@ -17,7 +18,7 @@ __author__ = "Kirill Chkirov"
 __license__ = "other"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
-__status__ = "Prototype"
+__status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
@@ -60,6 +61,9 @@ class Lab:
     """
     def __init__(self, test:str) -> None:
 
+        self.test_name:str
+        self.path:str
+
         self.test_name = test
         self.path = tempfile.mkdtemp()
 
@@ -69,7 +73,11 @@ class Lab:
         shutil.rmtree(self.path)
 
 
-    def create_redirects_lab(self) -> tuple:
+    def create_redirects_lab(self) -> List[str]:
+
+        filenames:List[str]
+        paths:List[str]
+        contents:List[str]
 
         filenames = ["file1", "file2", "file3", "file4"]
         paths = [os.path.join(self.path, filename) for filename in filenames]
@@ -79,10 +87,10 @@ class Lab:
             with open(path, 'w') as file:
                 file.write(content)
 
-        return tuple(paths)
+        return paths
 
 
-    def remove_redirects_lab(self, files:list) -> None:
+    def remove_redirects_lab(self, files:List[str]) -> None:
 
         for file in files:
             if os.path.exists(file):
@@ -90,6 +98,8 @@ class Lab:
 
 
     def create_exit_status_lab(self) -> str:
+
+        path:str
 
         path = os.path.join(self.path, "not_executable_file")
         with open(path, 'w') as file:
@@ -105,6 +115,10 @@ class Lab:
 
 
     def create_wildcards_lab(self) -> tuple:
+
+        filenames:List[str]
+        dirnames:List[str]
+
         filenames = ["file1", "file2"]
         dirnames = ["directory1", "directory2"]
 
