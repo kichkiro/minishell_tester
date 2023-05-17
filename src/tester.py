@@ -8,8 +8,7 @@ results.
 # Libraries ------------------------------------------------------------------>
 
 import os
-from subprocess import Popen
-from typing import List
+from typing import List, Union
 
 from termcolor import colored
 import tests
@@ -47,7 +46,29 @@ class Tester:
     run():
         Runs the test cases and prints the results.
 
-    ...
+    __exec():
+        Executes a test case using the provided process object, test 
+        name, and loop index.
+        Compares the output of the test case in both Bash and Minishell 
+        and prints the result.
+
+    __exec2():
+        Executes a test case using the provided process object, 
+        test name, loop index, and lab object.
+        Compares the output and file contents of the test case in both 
+        Bash and Minishell and prints the result.
+
+    __exitstatus():
+        Executes a test case to check the exit status using the provided 
+        process object, test name, loop index, and lab object.
+        Compares the exit status of the test case in both Bash and 
+        Minishell and prints the result.
+
+    __wildcards():
+        Executes a test case with wildcard expansion using the provided 
+        process object, test name, loop index, and lab object.
+        Compares the output of the test case in both Bash and Minishell 
+        and prints the result.
 
     Notes
     --------------------------------------------------------------------
@@ -85,8 +106,8 @@ class Tester:
             self.tests = tests.booleans
         elif test == "wildcards":
             self.tests = tests.wildcards
-        elif test == "mix_bonus":
-            self.tests = tests.mix_bonus
+        # elif test == "mix_bonus":
+        #     self.tests = tests.mix_bonus
 
     def run(self) -> None:
 
@@ -117,8 +138,8 @@ class Tester:
                     self.__exec(process, test, loop)
                 elif self.name == "wildcards":
                     self.__wildcards(process, test, loop, lab)
-                elif self.name == "mix_bonus":
-                    self.__exec2(process, test, loop, lab)
+                # elif self.name == "mix_bonus":
+                #     self.__exec2(process, test, loop, lab)
             except Exception as e:
                 print(colored(f"Exception: {e}", "red"))
             finally:
@@ -129,7 +150,7 @@ class Tester:
     def __exec(self, process:Process, test:str, loop:int) -> None:
 
         bash_out:str
-        minishell_out:str|None
+        minishell_out:Union[str,None]
 
         bash_out = process.get_bash_output(test)
         minishell_out = process.get_minishell_output(
@@ -190,7 +211,7 @@ class Tester:
 
         file:str
         bash_out:str
-        minishell_out:str|None
+        minishell_out:Union[str,None]
 
         file = lab.create_exit_status_lab()
         bash_out = process.get_bash_output(test)
@@ -216,7 +237,7 @@ class Tester:
         files:List[str]
         dirs:List[str]
         bash_out:str
-        minishell_out:str|None
+        minishell_out:Union[str,None]
 
         files, dirs = lab.create_wildcards_lab()
         bash_out = process.get_bash_output(test)

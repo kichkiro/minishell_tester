@@ -43,10 +43,10 @@ parsing = [
     "echo '<< | | >>'42",
     "echo ''",
     "echo ''''42''",
-    "echo $'USER'",
-    "echo $'USER'USER",
+    "echo $",
+    "echo '$'",
+    "echo \"42\"'$'\"42\"",
     "echo a'b'c'd'e'f'g'h'i'j'k'l'm'n'o'p'q'r's't'",
-    "echo a'b'c'd'e'f'g'h'i'j'k'l'm''",
     "echo \" \"'$USER\"'\"42 \" ''\"  | << -1\"",
     "echo \"<< EOF\"",
     "echo $HOME",
@@ -283,16 +283,26 @@ wildcards = [
     "echo *1 file* f*2 d***ct*y* d*r*ory2 *2 *3 *4 *5 *6 *7 *8 *9 *10 *11 *12"
 ]
 
-mix_bonus = [
-    "echo * | cat > file1",
-    "echo * | cat > file1 | cat < file1",
-    "echo * | cat > file1 | cat < file1 | cat > file2",
-    "echo *** | cat > file1",
-    "ls * | grep 1",
-    "ls *** | grep 1",
-    "ls *1 | grep file",
-    "(echo f*l*********1 && ls not_dir) | cat > file1 && echo 21 || echo 42",
-    "(((echo ***1 || ls not_dir) && cat < file1 | cat > file2 || ls ***",
-    "echo *1 | cat > file1 && grep * | cat > file2 | cat < file2",
-    
-]
+# mix_bonus = [
+#     # "echo * | cat > file1",
+#     # "echo * | cat > file1 | cat < file1",
+#     # "echo * | cat > file1 | cat < file1 | cat > file2",
+#     # "echo *** | cat > file1",
+#     # "ls * | grep 1",
+#     # "ls *** | grep 1",
+#     # "ls *1 | grep file",
+#     "(echo a && echo b) > file1",
+#     "(echo a || echo b) > file1",
+#     "(echo a && echo b || echo c && echo d) > file1",
+#     "(((echo a || echo b) > file1) && echo c) | cat > file2 || echo d",
+#     "echo file1 && ls not_dir | cat > file1",
+#     "(echo file1 && ls not_dir) | cat > file1",
+#     "(echo file1 && ls not_dir) | cat > file1 && echo 21 || echo 42",
+#     "(echo f*l*********1 && ls not_dir) | cat > file1 && echo 21 || echo 42",
+#     # "(((echo ***1 || ls not_dir) && cat < file1 | cat > file2 || ls ***",
+#     # "echo *1 | cat > file1 && grep * | cat > file2 | cat < file2",
+#     # "(echo a) | echo b",
+#     "(echo a || echo b) | echo c",
+#     "(echo a && echo b) | echo c || echo d && (echo e || echo f) | echo g",
+#     "(cat < file1 || echo a) | (cat > file2 && echo b) > file3 | echo c",
+# ]

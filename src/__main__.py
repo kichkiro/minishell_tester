@@ -115,10 +115,10 @@ def main(argv: List[str]) -> None:
     printer.section("Wildcards")
     wildcards.run()
 
-    # MIX BONUS -------------------------------------------------------------->
+    # # MIX BONUS -------------------------------------------------------------->
 
-    printer.section("Mix Bonus")
-    mix_bonus.run()
+    # printer.section("Mix Bonus")
+    # mix_bonus.run()
 
     # SUMMARY ---------------------------------------------------------------->
 

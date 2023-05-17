@@ -6,6 +6,7 @@ Class that handles printing.
 
 # Libraries ------------------------------------------------------------------>
 
+from typing import Union
 from termcolor import colored
 
 # Authorship ----------------------------------------------------------------->
@@ -89,10 +90,14 @@ class Printer:
         
 
     def result(
-        self, status:str, loop:int, test:str, bash_output:str|None=None,
-        minishell_output:str|None=None, bash_file_content:dict|None=None,
-        minishell_file_content:dict|None=None, exception:str|None=None, 
-        bash_exit_status:int|None=None, minishell_exit_status:int|None=None
+        self, status:str, loop:int, test:str, 
+        bash_output:Union[str,None]=None,
+        minishell_output:Union[str,None]=None, 
+        bash_file_content:Union[dict,None]=None,
+        minishell_file_content:Union[dict,None]=None, 
+        exception:Union[str,None]=None, 
+        bash_exit_status:Union[int,None]=None, 
+        minishell_exit_status:Union[int,None]=None
     ) -> None:
         
         color:str
@@ -208,10 +213,11 @@ class Printer:
     
     
     def __archive(
-        self, test:str, status:str, bash_output:str|None, 
-        minishell_output:str|None, bash_file_content:dict|None, 
-        minishell_file_content:dict|None, exception:str|None, 
-        bash_exit_status:int|None=None, minishell_exit_status:int|None=None
+        self, test:str, status:str, bash_output:Union[str,None], 
+        minishell_output:Union[str,None], bash_file_content:Union[dict,None], 
+        minishell_file_content:Union[dict,None], exception:Union[str,None], 
+        bash_exit_status:Union[int,None]=None, 
+        minishell_exit_status:Union[int,None]=None
     ) -> None:
         
         archive:str

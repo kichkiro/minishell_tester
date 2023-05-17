@@ -16,7 +16,7 @@ import signal
 import shutil
 import threading
 import subprocess
-from typing import List
+from typing import List, Union
 
 from printer import Printer
 
@@ -68,7 +68,10 @@ class Process():
         to get the output of "echo $?" on the same minishell instance.
 
     get_minishell_output_pty():
-        ...
+        It does the same thing as get_minishell_output() but uses the
+        pty module to create a pseudo-tty and interact with it.
+        This is because subprocess.Popen() does not correctly read
+        the output when there are redirects or pipes in it.
     """
     def __init__(self, args:str, printer:Printer) -> None:
 
@@ -113,7 +116,7 @@ class Process():
 
 
     def get_minishell_output(self, bash_output:str, input:str, loop:int, \
-        get_exit_status:bool) -> str|None:
+        get_exit_status:bool) -> Union[str,None]:
        
         minishell_out:str
         counter:int
