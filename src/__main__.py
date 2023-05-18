@@ -17,8 +17,8 @@ from printer import Printer
 
 # Authorship ----------------------------------------------------------------->
 
-__author__ = "Kirill Chkirov"
-__license__ = "other"
+__author__ = "Kirill Shkirov"
+__license__ = "GPL-3.0"
 __email__ = "kichkiro@student.42firenze.it"
 __slack__ = "kichkiro"
 __status__ = "Development"
