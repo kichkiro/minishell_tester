@@ -187,14 +187,14 @@ class Lab:
         for i, filename in enumerate(filenames):
             filepath = os.path.join(".", filename)
             with open(filepath, "w", encoding="utf-8") as file:
-                file.write(str(i+1))
+                file.write(str(i + 1))
 
         for dirname in dirnames:
             os.makedirs(dirname)
             for i, filename in enumerate(filenames):
                 filepath = os.path.join(dirname, filename)
                 with open(filepath, "w", encoding="utf-8") as file:
-                    file.write(str(i+1))
+                    file.write(str(i + 1))
 
         return (filenames, dirnames)
 
