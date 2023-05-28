@@ -6,8 +6,8 @@ Arguments for testing.
 
 # Libraries ------------------------------------------------------------------>
 
-from typing import List
 from shutil import which
+from typing import List
 
 # Authorship ----------------------------------------------------------------->
 
@@ -19,15 +19,15 @@ __status__ = "Development"
 
 # TESTS ---------------------------------------------------------------------->
 
-parsing:List[str]
-commands:List[str]
-redirects:List[str]
-pipes:List[str]
-exit_status:List[str]
-mix_mandatory:List[str]
-booleans:List[str]
-wildcards:List[str]
-mix_bonus:List[str]
+parsing: List[str]
+commands: List[str]
+redirects: List[str]
+pipes: List[str]
+exit_status: List[str]
+mix_mandatory: List[str]
+booleans: List[str]
+wildcards: List[str]
+mix_bonus: List[str]
 
 parsing = [
     "echo ",
@@ -36,7 +36,7 @@ parsing = [
     "echo 42   42    '  '42",
     "echo 'echo $v >> file.txt'",
     "echo ' \"\" ' '42'",
-	"echo '$?'",
+    "echo '$?'",
     "echo '${$?}'",
     "echo 42' '42",
     "echo '$USER'",
@@ -57,7 +57,7 @@ parsing = [
     "echo '$USER \"$HOME\"'",
     "echo $USER '>> file.txt' \"|\"",
     "echo '42 $USER' \">\" file.txt",
-    "echo \"$USER 42\" '\"$USER\"'" ,
+    "echo \"$USER 42\" '\"$USER\"'",
     "echo $USER42",
     "echo ''\"\"'\"'\"'\"",
 ]
@@ -145,8 +145,8 @@ pipes = [
     "ps -ef | grep apache | grep -v grep",
     "echo 1 | echo 2 | echo 3 | echo 4 | echo 5 | echo 6 | echo 7",
     "echo 1 | echo 2 | echo 3 | echo 4 | echo 42 | grep 2",
-    "echo $SHELL | sed 's/.*/\L&/'",
-    "echo $LOGNAME | sed 's/.*/\L&/'",
+    "echo $SHELL | grep bash",
+    "echo $LOGNAME | grep $LOGNAME",
     "echo \"$USER\" 42 \"'$SHELL'\" | grep bash | wc -l",
     "echo \"$USER\" 42 \"'$SHELL'\" | grep bash | wc -l | echo 42",
     "echo \"$USER\" 42 \"'$SHELL'\" | echo 42",
@@ -177,7 +177,6 @@ exit_status = [
     "ls not_existing_file",
     "ls not_existing_file | echo 42 | cat",
     "ls not_existing_file | cat > not_executable_file",
-
 ]
 
 mix_mandatory = [
@@ -202,7 +201,7 @@ mix_mandatory = [
     ">> file1 | cat",
     ">> file1 | echo 42",
     "> file1 | cat < file1",
-    "> file1 | echo 42 < file1 | cat file1",    
+    "> file1 | echo 42 < file1 | cat file1",
     "echo 42 | wc -l | cat > file1",
     "echo 42 | cat | cat | cat | cat",
     "echo 42 | cat | cat | cat | cat | echo 21",
@@ -242,12 +241,12 @@ booleans = [
     "echo 1 && (echo 2 || echo 3) && () && echo 4",
     "((echo 1 && echo 2) || (echo 3 || echo 4)) && (echo 5 && echo 6)",
     "(echo 1 && echo 2) || ((echo 3 || echo 4) && (echo 5 || echo 6)) || "
-        "(echo 7 && echo 8)",
+    "(echo 7 && echo 8)",
     "echo 1 && (echo 2 || echo 3) && (echo 4 || (echo 5 && (echo 6 || echo 7 "
-        "&& (echo 8 || (echo 9 && echo 10)))))",
+    "&& (echo 8 || (echo 9 && echo 10)))))",
     "echo 1 || (echo 2 || echo 3 || echo 4 || echo 5 || echo 6 || echo 7 || "
-        "echo 8 || echo 9 || echo 10 || echo 11 || echo 12 || echo 13 || echo "
-        "14 || echo 15 || echo 16 || echo 17 || echo 18 || echo 19 || echo 20)"
+    "echo 8 || echo 9 || echo 10 || echo 11 || echo 12 || echo 13 || echo "
+    "14 || echo 15 || echo 16 || echo 17 || echo 18 || echo 19 || echo 20)"
 ]
 
 wildcards = [

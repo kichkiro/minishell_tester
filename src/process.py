@@ -1,21 +1,21 @@
 #!/usr/bin/python3
 
 """
-This module contains the `Process` class, which provides methods to 
-execute a command in a subprocess and interact with its input and output 
+This module contains the `Process` class, which provides methods to
+execute a command in a subprocess and interact with its input and output
 streams.
 """
 
 # Libraries ------------------------------------------------------------------>
 
 import os
-import re
 import pty
-import time
-import signal
+import re
 import shutil
-import threading
+import signal
 import subprocess
+import threading
+import time
 from typing import List, Union
 
 from printer import Printer
@@ -29,6 +29,7 @@ __slack__ = "kichkiro"
 __status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
+
 
 class Process():
     """
@@ -45,7 +46,7 @@ class Process():
 
     exit_status_bash : int
         The exit status of the bash process.
-    
+
     exit_status_minishell : int
         The exit status of the minishell process.
 
@@ -55,17 +56,7 @@ class Process():
         Runs a Bash command and returns its output as a string.
 
     get_minishell_output():
-        It gets minishell output via a synchronization with bash output 
-        to avoid including the prompt or other garbage, but 
-        nevertheless, it is possible that not all cases are handled.
-
-        It has been prefirmed to use write and read with write() and 
-        readlines() methods, as they allow more flexibility, than 
-        directly communicate(), although this requires more complex 
-        handling with threads since readlines() is subject to blocking.
-
-        If the get_exit_status argument is True, it performs a recursion 
-        to get the output of "echo $?" on the same minishell instance.
+        It gets minishell output with subprocess.Popen().
 
     get_minishell_output_pty():
         It does the same thing as get_minishell_output() but uses the
@@ -73,58 +64,95 @@ class Process():
         This is because subprocess.Popen() does not correctly read
         the output when there are redirects or pipes in it.
     """
-    def __init__(self, args:str, printer:Printer) -> None:
 
-        self.args:str
-        self.process:subprocess.Popen
-        self.printer:Printer
-        self.exit_status_bash:int
-        self.exit_status_minishell:int
+    def __init__(self, args: str, printer: Printer) -> None:
+
+        self.args: str
+        self.process: subprocess.Popen
+        self.printer: Printer
+        self.exit_status_bash: int
+        self.exit_status_minishell: int
 
         self.args = args
-        self.process:subprocess.Popen = subprocess.Popen(
+        self.process: subprocess.Popen = subprocess.Popen(
             args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            universal_newlines=True,   
+            universal_newlines=True,
         )
         self.printer = printer
         self.exit_status_bash = 0
         self.exit_status_minishell = 0
 
+    def get_bash_output(self, test: str) -> str:
+        """
+        Runs a Bash command and returns its output as a string.
 
-    def get_bash_output(self, input:str) -> str:
+        Params
+        ----------------------------------------------------------------
+        test : str
+            The command to run.
 
-        bash_output:str
-        
+        Returns
+        ----------------------------------------------------------------
+        bash_output : str
+            The output of the command executed in Bash.
+        """
+        bash_output: str
+
         bash_output = ""
         try:
             bash_output = subprocess.check_output(
-                input,
+                test,
                 shell=True,
                 executable=shutil.which("bash"),
                 text=True,
                 universal_newlines=True,
                 stderr=subprocess.DEVNULL,
             )
-        except subprocess.CalledProcessError as e:
-            self.exit_status_bash = e.returncode
+        except subprocess.CalledProcessError as err:
+            self.exit_status_bash = err.returncode
 
         return bash_output
 
+    def get_minishell_output(self, bash_output: str, test: str, loop: int,
+                             get_exit_status: bool) -> Union[str, None]:
+        """
+        It gets minishell output via a synchronization with bash output
+        to avoid including the prompt or other garbage, but
+        nevertheless, it is possible that not all cases are handled.
+        It has been prefirmed to use write and read with write() and
+        readlines() methods, as they allow more flexibility, than
+        directly communicate(), although this requires more complex
+        handling with threads since readlines() is subject to blocking.
+        If the get_exit_status argument is True, it performs a recursion
+        to get the output of "echo $?" on the same minishell instance.
 
-    def get_minishell_output(self, bash_output:str, input:str, loop:int, \
-        get_exit_status:bool) -> Union[str,None]:
-       
-        minishell_out:str
-        counter:int
-        tmp:List[str]
+        Params
+        ----------------------------------------------------------------
+        bash_output : str
+            The output of the bash command.
+        test : str
+            The command to run.
+        loop : int
+            The number of times to loop.
+        get_exit_status : bool
+            Whether to get the exit status of the minishell process.
 
-        def read_thread(self, tmp:list):
+        Returns
+        ----------------------------------------------------------------
+        minishell_out : str
+            The output of the command executed in minishell.
+        """
+        minishell_out: str
+        counter: int
+        tmp: List[str]
 
-            line:str
+        def read_thread(self, tmp: list):
+
+            line: str
 
             line = ""
             try:
@@ -141,10 +169,10 @@ class Process():
             minishell_out = ""
             counter = 0
 
-            self.process.stdin.write(input + '\n')
+            self.process.stdin.write(test + '\n')
             self.process.stdin.flush()
 
-            while input not in minishell_out:
+            while test not in minishell_out:
                 tmp = []
                 t = threading.Thread(target=read_thread, args=(self, tmp,))
                 t.start()
@@ -153,7 +181,7 @@ class Process():
                     raise subprocess.TimeoutExpired(self.process, 1)
                 minishell_out += tmp[0]
                 counter += 1
-                
+
             minishell_out = ""
             counter = 0
             while minishell_out.count('\n') <= bash_output.count('\n'):
@@ -171,37 +199,52 @@ class Process():
             if get_exit_status:
                 self.exit_status_minishell = int(self.get_minishell_output(
                     '\n', 'echo $?', loop, get_exit_status=False))
-                if self.exit_status_minishell == None:
+                if self.exit_status_minishell is None:
                     return None
 
             self.process.communicate(timeout=1)
             if self.process.returncode == -11:
                 self.printer.result(
-                    "KO", loop, input, exception="Segmentation fault")
+                    "KO", loop, test, excep="Segmentation fault")
                 return None
 
         except subprocess.TimeoutExpired:
             self.process.send_signal(signal.SIGINT)
-            self.printer.result("KO", loop, input, exception="Timeout")
+            self.printer.result("KO", loop, test, excep="Timeout")
             return None
-        except Exception as e:
-            if input != "echo $?":
-                self.printer.result("KO", loop, input, exception=e)
+        except Exception as err:
+            if test != "echo $?":
+                self.printer.result("KO", loop, test, excep=err)
             return None
 
         return minishell_out
 
+    def get_minishell_output_pty(self, bash_output: str, test: str) -> str:
+        """
+        It does the same thing as get_minishell_output() but uses the
+        pty module to create a pseudo-tty and interact with it.
+        This is because subprocess.Popen() does not correctly read
+        the output when there are redirects or pipes in it.
 
-    def get_minishell_output_pty(self, bash_output:str, input:str, \
-        loop:int) -> str:
+        Params
+        ----------------------------------------------------------------
+        bash_output : str
+            The output of the bash command.
+        test : str
+            The command to run.
 
-        master:int
-        slave:int
-        process_pty:subprocess.Popen
-        ansi_escape:re.Pattern
-        minishell_out:str
-        tmp:str
-        
+        Returns
+        ----------------------------------------------------------------
+        minishell_out : str
+            The output of the command executed in minishell.
+        """
+        master: int
+        slave: int
+        process_pty: subprocess.Popen
+        ansi_escape: re.Pattern
+        minishell_out: str
+        tmp: str
+
         master, slave = pty.openpty()
         process_pty = subprocess.Popen(
             self.args,
@@ -212,16 +255,16 @@ class Process():
         )
 
         ansi_escape = re.compile(r'\x1b\[[0-9;]*[mK]')
-        input += '\n'
-        os.write(master, input.encode())
+        test += '\n'
+        os.write(master, test.encode())
         time.sleep(0.5)
         tmp = ansi_escape.sub('', os.read(master, 1024).decode())
-        tmp = tmp[tmp.find(input) + len(input):]
-        tmp = tmp[tmp.find(input.strip('\n')) + len(input):]
+        tmp = tmp[tmp.find(test) + len(test):]
+        tmp = tmp[tmp.find(test.strip('\n')) + len(test):]
 
         minishell_out = ""
         for line in tmp.split('\n'):
-            if minishell_out.count('\n') == bash_output.count('\n') + 1: 
+            if minishell_out.count('\n') == bash_output.count('\n') + 1:
                 break
             minishell_out += line + '\n'
         minishell_out = minishell_out.strip('\n')
@@ -232,5 +275,5 @@ class Process():
         process_pty.kill()
         os.close(slave)
         os.close(master)
-        
+
         return minishell_out

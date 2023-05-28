@@ -11,9 +11,10 @@ import sys
 from typing import List
 
 from termcolor import colored
+
 import utils
-from tester import Tester
 from printer import Printer
+from tester import Tester
 
 # Authorship ----------------------------------------------------------------->
 
@@ -25,38 +26,41 @@ __status__ = "Development"
 
 # Functions ------------------------------------------------------------------>
 
+
 def main(argv: List[str]) -> None:
     """
     This is the main function of the program.
 
-    Params:
-        argv : List[str]
-            The list of arguments passed to the program.
+    Params
+    --------------------------------------------------------------------
+    argv : List[str]
+        The list of arguments passed to the program.
 
-    Returns:
-        None
+    Returns
+    --------------------------------------------------------------------
+    None
     """
-    project_path:str
-    exe:str
-    printer:Printer
-    parsing:Tester
-    commands:Tester
-    redirect:Tester
-    pipes:Tester
-    exit_status:Tester
-    mix_mandatory:Tester
-    booleans:Tester
-    wildcards:Tester
-    mix_bonus:Tester
+    project_path: str
+    exe: str
+    printer: Printer
+    parsing: Tester
+    commands: Tester
+    redirect: Tester
+    pipes: Tester
+    exit_status: Tester
+    mix_mandatory: Tester
+    booleans: Tester
+    wildcards: Tester
+    # mix_bonus: Tester
 
     if len(argv) != 2:
         print(colored("\nWrong input arguments...\n", "red", attrs=["bold"]),
-            file=sys.stderr)
+              file=sys.stderr)
         print(colored("[project_path]\n", "white"), file=sys.stderr)
-        exit()
+        sys.exit()
 
-    project_path:str = os.path.abspath(argv[1])
-    exe:str = "minishell"
+    project_path: str = os.path.abspath(argv[1])
+    exe: str = "minishell"
 
     printer = Printer()
     parsing = Tester(project_path, exe, "parsing", printer)
@@ -67,7 +71,7 @@ def main(argv: List[str]) -> None:
     mix_mandatory = Tester(project_path, exe, "mix_mandatory", printer)
     booleans = Tester(project_path, exe, "booleans", printer)
     wildcards = Tester(project_path, exe, "wildcards", printer)
-    mix_bonus = Tester(project_path, exe, "mix_bonus", printer)
+    # mix_bonus = Tester(project_path, exe, "mix_bonus", printer)
 
     # PRE-TEST --------------------------------------------------------------->
 
@@ -115,7 +119,7 @@ def main(argv: List[str]) -> None:
     printer.section("Wildcards")
     wildcards.run()
 
-    # # MIX BONUS -------------------------------------------------------------->
+    # # MIX BONUS ------------------------------------------------------------>
 
     # printer.section("Mix Bonus")
     # mix_bonus.run()
@@ -123,6 +127,7 @@ def main(argv: List[str]) -> None:
     # SUMMARY ---------------------------------------------------------------->
 
     printer.summary()
+
 
 if __name__ == "__main__":
     main(sys.argv)
