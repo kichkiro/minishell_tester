@@ -15,12 +15,12 @@ python3 --version >= Python 3.8
 git clone https://github.com/kichkiro/minishell_tester.git
 cd minishell_tester 
 pip3 install -r requirements.txt 
-python3 src/__main.py__ [project path]
+python3 src/__main__.py [project path]
 ```
 
 #### Next times
 ```bash
-python3 src/__main.py__ [project path]
+python3 src/__main__.py [project path]
 ```
 
 ## 📈 - Tester
